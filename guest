@@ -2,9 +2,10 @@
     "CIH1ILI92LYSAUGP": {
         "created_date": "2025-03-22 02:51:58",
         "expiry_date": "2025-04-21 02:51:58",
-        "is_used": false,
-        "used_by": null,
-        "duration_days": 30
+        "is_used": true,
+        "used_by": "880845879404285952",
+        "duration_days": 30,
+        "activated_date": "2025-03-22 02:59:46"
     },
     "F6GILYMLC8J9RGVI": {
         "created_date": "2025-03-22 02:55:07",
