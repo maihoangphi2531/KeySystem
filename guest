@@ -17,8 +17,9 @@
     "N898IVFPAAD6QPMW": {
         "created_date": "2025-03-22 02:57:50",
         "expiry_date": "2025-04-21 02:57:50",
-        "is_used": false,
-        "used_by": null,
-        "duration_days": 30
+        "is_used": true,
+        "used_by": "880845879404285952",
+        "duration_days": 30,
+        "activated_date": "2025-03-22 03:00:03"
     }
 }
