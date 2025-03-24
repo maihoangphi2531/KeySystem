@@ -20,6 +20,15 @@ local data = {
             "s",
         }
     },
+    ["H4SPKSUO3SCVKU59"] = {
+        created_date = "2025-03-25 02:02:30",
+        expiry_date = "2025-03-26 02:02:30",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
