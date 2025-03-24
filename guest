@@ -1,1 +1,9 @@
-
+{
+    "1DO5PL4ZN1668KL5": {
+        "created_date": "2025-03-24 23:05:27",
+        "expiry_date": "2025-03-25 23:05:27",
+        "is_used": false,
+        "used_by": null,
+        "duration_days": 1
+    }
+}
