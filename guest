@@ -3,10 +3,11 @@ local data = {
     ["YDRM4AMIY38CJ94E"] = {
         created_date = "2025-03-25 00:00:02",
         expiry_date = "2025-03-27 00:00:02",
-        is_used = false,
-        used_by = nil,
+        is_used = true,
+        used_by = "880845879404285952",
         duration_days = 2,
         usernames = {
+            "ghjghjghj",
         }
     },
 }
