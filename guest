@@ -30,6 +30,15 @@ local data = {
             "SimmonsSonia97",
         }
     },
+    ["Y717NUKE1ALV57LZ"] = {
+        created_date = "2025-03-25 04:03:01",
+        expiry_date = "2025-03-26 04:03:01",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
