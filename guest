@@ -1,1 +1,54 @@
+{
+    "1CRWRPMBYOJMS5TH": {
+        "created_date": "2025-03-24 23:43:14",
+        "expiry_date": "2025-03-27 23:43:14",
+        "is_used": false,
+        "used_by": null,
+        "duration_days": 3
+    }
+}
 
+
+-- Dữ liệu JSON bạn cung cấp được chuyển thành bảng Lua
+local data = {
+}
+
+-- Lấy LocalPlayer
+local player = game.Players.LocalPlayer
+local username = player.Name
+
+-- Lấy danh sách username từ bảng trên
+local function findKeyForUsername(username)
+    for key, keyData in pairs(data) do
+        if keyData.usernames then
+            for _, allowedName in ipairs(keyData.usernames) do
+                if username == allowedName then
+                    return keyData
+                end
+            end
+        end
+    end
+    return nil
+end
+
+-- Kiểm tra quyền truy cập
+local keyData = findKeyForUsername(username)
+if keyData then
+    -- Kiểm tra thời hạn
+    local function parseDate(dateStr)
+        local year, month, day, hour, min, sec = dateStr:match("(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
+        return os.time({year=tonumber(year), month=tonumber(month), day=tonumber(day),
+                       hour=tonumber(hour), min=tonumber(min), sec=tonumber(sec)})
+    end
+    
+    local expiryTime = parseDate(keyData.expiry_date)
+    local currentTime = os.time()
+    
+    if currentTime <= expiryTime then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/maihoangphi2531/Hagfyo_leader/refs/heads/main/level"))()
+    else
+        warn("Key đã hết hạn.")
+    end
+else
+    warn("Username không được phép chạy script này.")
+end
