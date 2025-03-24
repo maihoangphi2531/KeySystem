@@ -7,7 +7,15 @@ local data = {
         used_by = "880845879404285952",
         duration_days = 2,
         usernames = {
-            "BleuAngelica986",
+        }
+    },
+    ["DE1YQJZ2PQ59G4XR"] = {
+        created_date = "2025-03-25 00:17:00",
+        expiry_date = "2025-03-26 00:17:00",
+        is_used = false,
+        used_by = nil,
+        duration_days = 1,
+        usernames = {
         }
     },
 }
