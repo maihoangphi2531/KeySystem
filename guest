@@ -23,10 +23,11 @@ local data = {
     ["H4SPKSUO3SCVKU59"] = {
         created_date = "2025-03-25 02:02:30",
         expiry_date = "2025-03-26 02:02:30",
-        is_used = false,
-        used_by = "", 
+        is_used = true,
+        used_by = "880845879404285952", 
         duration_days = 1,
         usernames = {
+            "SimmonsSonia97",
         }
     },
 }
