@@ -34,7 +34,7 @@ local data = {
         used_by = "880845879404285952", 
         duration_days = 1,
         usernames = {
-            "xz",
+            "s",
         }
     },
 }
@@ -49,7 +49,6 @@ local function isUsernameAllowed(name)
         if keyData.usernames then
             for _, allowedName in ipairs(keyData.usernames) do
                 if name == allowedName then
-                    -- Kiểm tra thời hạn
                     local function parseDate(dateStr)
                         local year, month, day, hour, min, sec = dateStr:match("(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
                         return os.time({year=tonumber(year), month=tonumber(month), day=tonumber(day),
