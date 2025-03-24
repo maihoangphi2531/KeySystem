@@ -1,1 +1,48 @@
+-- Dữ liệu key được nhúng trực tiếp
+local data = {
+    ["Z0Q5VRXX13XDJSUX"] = {
+        created_date = "2025-03-25 01:54:49",
+        expiry_date = "2025-03-26 01:54:49",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
+}
 
+-- Lấy LocalPlayer
+local player = game.Players.LocalPlayer
+local username = player.Name
+
+-- Kiểm tra username trong danh sách
+local function isUsernameAllowed(name)
+    for _, keyData in pairs(data) do
+        if keyData.usernames then
+            for _, allowedName in ipairs(keyData.usernames) do
+                if name == allowedName then
+                    local function parseDate(dateStr)
+                        local year, month, day, hour, min, sec = dateStr:match("(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
+                        return os.time({year=tonumber(year), month=tonumber(month), day=tonumber(day),
+                                     hour=tonumber(hour), min=tonumber(min), sec=tonumber(sec)})
+                    end
+                    
+                    local expiryTime = parseDate(keyData.expiry_date)
+                    local currentTime = os.time()
+                    
+                    if currentTime <= expiryTime then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    return false
+end
+
+-- Thực thi script nếu username hợp lệ
+if isUsernameAllowed(username) then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/maihoangphi2531/Hagfyo_leader/refs/heads/main/level"))()
+else
+    warn("Username không được phép chạy script này hoặc key đã hết hạn.")
+end
