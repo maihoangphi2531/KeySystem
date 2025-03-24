@@ -9,6 +9,15 @@ local data = {
         usernames = {
         }
     },
+    ["TOMT4MZOEIUU4JUX"] = {
+        created_date = "2025-03-25 01:21:13",
+        expiry_date = "2025-03-26 01:21:13",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
