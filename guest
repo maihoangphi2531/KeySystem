@@ -3,10 +3,11 @@ local data = {
     ["AQVQM59AHPS8XGD2"] = {
         created_date = "2025-03-25 01:21:01",
         expiry_date = "2025-03-26 01:21:01",
-        is_used = false,
-        used_by = "", 
+        is_used = true,
+        used_by = "880845879404285952", 
         duration_days = 1,
         usernames = {
+            "maihoangpi",
         }
     },
     ["TOMT4MZOEIUU4JUX"] = {
