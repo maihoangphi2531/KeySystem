@@ -3,10 +3,11 @@ local data = {
     ["GQPRZK22EN0PMN83"] = {
         created_date = "2025-03-26 23:32:59",
         expiry_date = "2025-03-27 23:32:59",
-        is_used = false,
-        used_by = "", 
+        is_used = true,
+        used_by = "1259550001831477299", 
         duration_days = 1,
         usernames = {
+            "phingau1",
         }
     },
 }
