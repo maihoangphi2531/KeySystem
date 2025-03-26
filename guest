@@ -1,38 +1,8 @@
 -- Dữ liệu key được nhúng trực tiếp
 local data = {
-    ["Z0Q5VRXX13XDJSUX"] = {
-        created_date = "2025-03-25 01:54:49",
-        expiry_date = "2025-03-26 01:54:49",
-        is_used = true,
-        used_by = "880845879404285952", 
-        duration_days = 1,
-        usernames = {
-            "z",
-        }
-    },
-    ["HI4B9BNJCCZKXW92"] = {
-        created_date = "2025-03-25 01:55:00",
-        expiry_date = "2025-03-26 01:55:00",
-        is_used = true,
-        used_by = "880845879404285952", 
-        duration_days = 1,
-        usernames = {
-            "s",
-        }
-    },
-    ["H4SPKSUO3SCVKU59"] = {
-        created_date = "2025-03-25 02:02:30",
-        expiry_date = "2025-03-26 02:02:30",
-        is_used = true,
-        used_by = "880845879404285952", 
-        duration_days = 1,
-        usernames = {
-            "SimmonsSonia97",
-        }
-    },
-    ["Y717NUKE1ALV57LZ"] = {
-        created_date = "2025-03-25 04:03:01",
-        expiry_date = "2025-03-26 04:03:01",
+    ["GQPRZK22EN0PMN83"] = {
+        created_date = "2025-03-26 23:32:59",
+        expiry_date = "2025-03-27 23:32:59",
         is_used = false,
         used_by = "", 
         duration_days = 1,
@@ -74,5 +44,12 @@ end
 if isUsernameAllowed(username) then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/maihoangphi2531/Hagfyo_leader/refs/heads/main/level"))()
 else
+    local StarterGui = game:GetService("StarterGui")
+    StarterGui:SetCore("SendNotification", {
+        Title = "Thông báo",
+        Text = "Hãy liên hệ Maxi để mua key.",
+        Duration = 5,
+        Button1 = "OK"
+    })
     warn("Username không được phép chạy script này hoặc key đã hết hạn.")
 end
