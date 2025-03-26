@@ -20,6 +20,15 @@ local data = {
             "AEGG0N",
         }
     },
+    ["6DL9S0M2D04GITP5"] = {
+        created_date = "2025-03-27 02:51:37",
+        expiry_date = "2025-03-28 02:51:37",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
