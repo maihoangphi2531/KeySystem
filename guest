@@ -126,6 +126,15 @@ local data = {
         usernames = {
         }
     },
+    ["BVARF8MSIEG5DVU1"] = {
+        created_date = "2025-03-27 22:16:02",
+        expiry_date = "2025-04-24 22:16:02",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
