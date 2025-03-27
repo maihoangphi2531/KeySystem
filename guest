@@ -1,1 +1,183 @@
+-- Dữ liệu key được nhúng trực tiếp
+local data = {
+    ["GQPRZK22EN0PMN83"] = {
+        created_date = "2025-03-26 23:32:59",
+        expiry_date = "2025-03-27 23:32:59",
+        is_used = true,
+        used_by = "1259550001831477299", 
+        duration_days = 1,
+        usernames = {
+            "phingau1",
+        }
+    },
+    ["2HET56F8JFM6P8ZD"] = {
+        created_date = "2025-03-26 23:46:05",
+        expiry_date = "2025-03-27 23:46:05",
+        is_used = true,
+        used_by = "714479512837947423", 
+        duration_days = 1,
+        usernames = {
+            "AEGG0N",
+        }
+    },
+    ["6DL9S0M2D04GITP5"] = {
+        created_date = "2025-03-27 02:51:37",
+        expiry_date = "2025-03-28 02:51:37",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
+    ["9OGP8HQ67NHRRVUT"] = {
+        created_date = "2025-03-27 03:16:03",
+        expiry_date = "2025-04-26 03:16:03",
+        is_used = false,
+        used_by = "", 
+        duration_days = 30,
+        usernames = {
+        }
+    },
+    ["CE1FOD0Q9H2Y0V4D"] = {
+        created_date = "2025-03-27 03:49:09",
+        expiry_date = "2025-04-03 03:49:09",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["OX2UZNPH80ZMFDSE"] = {
+        created_date = "2025-03-27 03:49:12",
+        expiry_date = "2025-04-03 03:49:12",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["IBTE0IFZ5DL1FWVE"] = {
+        created_date = "2025-03-27 03:49:16",
+        expiry_date = "2025-04-03 03:49:16",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["5PMDZNTKZYBE4EC9"] = {
+        created_date = "2025-03-27 03:49:19",
+        expiry_date = "2025-04-03 03:49:19",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["NA4TM0U8MX440XB9"] = {
+        created_date = "2025-03-27 03:49:22",
+        expiry_date = "2025-04-03 03:49:22",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["IZYODHBDGSUXRMTT"] = {
+        created_date = "2025-03-27 03:49:25",
+        expiry_date = "2025-04-03 03:49:25",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["0ADT7MVC7OQZ6H3G"] = {
+        created_date = "2025-03-27 03:49:29",
+        expiry_date = "2025-04-03 03:49:29",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["LGW7HCITHX7ZUFA0"] = {
+        created_date = "2025-03-27 03:49:32",
+        expiry_date = "2025-04-03 03:49:32",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["C5I2GXF3VUFVGS4H"] = {
+        created_date = "2025-03-27 03:49:35",
+        expiry_date = "2025-04-03 03:49:35",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["RQJOI2UDXPEYBV8H"] = {
+        created_date = "2025-03-27 03:49:38",
+        expiry_date = "2025-04-03 03:49:38",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["57IZTV54PK7N53FC"] = {
+        created_date = "2025-03-27 20:52:01",
+        expiry_date = "2025-03-28 20:52:01",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
+}
 
+-- Lấy LocalPlayer
+local player = game.Players.LocalPlayer
+local username = player.Name
+
+-- Kiểm tra username trong danh sách
+local function isUsernameAllowed(name)
+    for _, keyData in pairs(data) do
+        if keyData.usernames then
+            for _, allowedName in ipairs(keyData.usernames) do
+                if name == allowedName then
+                    local function parseDate(dateStr)
+                        local year, month, day, hour, min, sec = dateStr:match("(%d+)-(%d+)-(%d+) (%d+):(%d+):(%d+)")
+                        return os.time({year=tonumber(year), month=tonumber(month), day=tonumber(day),
+                                     hour=tonumber(hour), min=tonumber(min), sec=tonumber(sec)})
+                    end
+                    
+                    local expiryTime = parseDate(keyData.expiry_date)
+                    local currentTime = os.time()
+                    
+                    if currentTime <= expiryTime then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    return false
+end
+
+-- Thực thi script nếu username hợp lệ
+if isUsernameAllowed(username) then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/maihoangphi2531/Hagfyo_leader/refs/heads/main/level"))()
+else
+    local StarterGui = game:GetService("StarterGui")
+    StarterGui:SetCore("SendNotification", {
+        Title = "Thông báo",
+        Text = "Hãy liên hệ Maxi để mua key.",
+        Duration = 5,
+        Button1 = "OK"
+    })
+    warn("Username không được phép chạy script này hoặc key đã hết hạn.")
+end
