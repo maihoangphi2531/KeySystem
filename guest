@@ -90,6 +90,15 @@ local data = {
         usernames = {
         }
     },
+    ["CZ41SE3RUJZRAN1C"] = {
+        created_date = "2025-03-27 22:14:23",
+        expiry_date = "2025-04-24 22:14:23",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
