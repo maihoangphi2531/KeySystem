@@ -81,6 +81,15 @@ local data = {
         usernames = {
         }
     },
+    ["WNQIME9JVSKRKMHC"] = {
+        created_date = "2025-03-27 22:14:20",
+        expiry_date = "2025-04-24 22:14:20",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
