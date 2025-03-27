@@ -96,10 +96,11 @@ local data = {
     ["CZ41SE3RUJZRAN1C"] = {
         created_date = "2025-03-27 22:14:23",
         expiry_date = "2025-04-24 22:14:23",
-        is_used = false,
-        used_by = "", 
+        is_used = true,
+        used_by = "714479512837947423", 
         duration_days = 28,
         usernames = {
+            "EDD_0505",
         }
     },
     ["M5ZUM7NIUNDCDLZ5"] = {
