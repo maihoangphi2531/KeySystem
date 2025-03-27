@@ -106,10 +106,11 @@ local data = {
     ["M5ZUM7NIUNDCDLZ5"] = {
         created_date = "2025-03-27 22:14:27",
         expiry_date = "2025-04-24 22:14:27",
-        is_used = false,
-        used_by = "", 
+        is_used = true,
+        used_by = "714479512837947423", 
         duration_days = 28,
         usernames = {
+            "dialelo",
         }
     },
     ["L2COQ42NOIFNKZAJ"] = {
