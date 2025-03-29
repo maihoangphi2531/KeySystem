@@ -12,11 +12,12 @@ local data = {
     },
     ["R3R4SYQAPAJII94J"] = {
         created_date = "2025-03-27 22:13:56",
-        expiry_date = "2025-04-24 22:13:56",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-04-26 13:26:25",
+        is_used = true,
+        used_by = "714479512837947423", 
         duration_days = 28,
         usernames = {
+            "nurssffin",
         }
     },
     ["ZXJBWK21IWEHV88V"] = {
