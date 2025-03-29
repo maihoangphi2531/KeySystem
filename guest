@@ -1,30 +1,13 @@
 -- Dữ liệu key được nhúng trực tiếp
 local data = {
-    ["0KTP6V9SD2QUVQSP"] = {
-        created_date = "2025-03-27 21:17:20",
-        expiry_date = "2025-03-28 21:17:20",
-        is_used = false,
-        used_by = "", 
-        duration_days = 1,
-        usernames = {
-        }
-    },
-    ["HV042MDR8X364CDS"] = {
-        created_date = "2025-03-27 21:32:33",
-        expiry_date = "2025-03-28 21:32:33",
-        is_used = false,
-        used_by = "", 
-        duration_days = 1,
-        usernames = {
-        }
-    },
     ["HRF9RML4HKHWBKXJ"] = {
         created_date = "2025-03-27 22:13:53",
-        expiry_date = "2025-04-24 22:13:53",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-04-26 13:26:00",
+        is_used = true,
+        used_by = "714479512837947423", 
         duration_days = 28,
         usernames = {
+            "yurikayekim123",
         }
     },
     ["R3R4SYQAPAJII94J"] = {
