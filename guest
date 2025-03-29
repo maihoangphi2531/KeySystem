@@ -22,11 +22,12 @@ local data = {
     },
     ["ZXJBWK21IWEHV88V"] = {
         created_date = "2025-03-27 22:14:00",
-        expiry_date = "2025-04-24 22:14:00",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-04-26 13:26:44",
+        is_used = true,
+        used_by = "714479512837947423", 
         duration_days = 28,
         usernames = {
+            "nurssffin1",
         }
     },
     ["MY60FVFZAZKQNU39"] = {
