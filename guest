@@ -42,11 +42,12 @@ local data = {
     },
     ["XRLJQJL2T7XDIH5A"] = {
         created_date = "2025-03-27 22:14:09",
-        expiry_date = "2025-04-24 22:14:09",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-04-27 17:42:35",
+        is_used = true,
+        used_by = "714479512837947423", 
         duration_days = 28,
         usernames = {
+            "Demonlordaizen20",
         }
     },
     ["39T934IDZ9C45QBW"] = {
