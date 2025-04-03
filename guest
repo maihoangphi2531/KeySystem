@@ -1,5 +1,23 @@
 -- Dữ liệu key được nhúng trực tiếp
 local data = {
+    ["0KTP6V9SD2QUVQSP"] = {
+        created_date = "2025-03-27 21:17:20",
+        expiry_date = "2025-03-28 21:17:20",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
+    ["HV042MDR8X364CDS"] = {
+        created_date = "2025-03-27 21:32:33",
+        expiry_date = "2025-03-28 21:32:33",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
     ["HRF9RML4HKHWBKXJ"] = {
         created_date = "2025-03-27 22:13:53",
         expiry_date = "2025-04-26 13:26:00",
@@ -165,6 +183,232 @@ local data = {
         is_used = false,
         used_by = "", 
         duration_days = 28,
+        usernames = {
+        }
+    },
+    ["NU49VH7PGED928GJ"] = {
+        created_date = "2025-04-04 00:59:57",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["3XXA3ZQZIT7JNQXS"] = {
+        created_date = "2025-04-04 01:00:56",
+        expiry_date = "2025-05-02 01:01:05",
+        is_used = true,
+        used_by = "123456789", 
+        duration_days = 28,
+        usernames = {
+            "TestUser",
+        }
+    },
+    ["KZ397VNGIF9IU1BT"] = {
+        created_date = "2025-04-04 01:05:58",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["UTK1GIPDN81SULJY"] = {
+        created_date = "2025-04-04 01:06:08",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["W6CSCCGHE6AFT59R"] = {
+        created_date = "2025-04-04 01:06:18",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["XWOT4AC9CIIHGB4M"] = {
+        created_date = "2025-04-04 01:06:27",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["1ASWAGXR725L3H5O"] = {
+        created_date = "2025-04-04 01:06:37",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["7H39T41UV5PJUNQX"] = {
+        created_date = "2025-04-04 01:06:47",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["H5MEB1BZB657TBPF"] = {
+        created_date = "2025-04-04 01:06:57",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["12QW9CXQFIAHGGNL"] = {
+        created_date = "2025-04-04 01:07:07",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["BFWSYTIJ9F8LM7OU"] = {
+        created_date = "2025-04-04 01:07:16",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["NJFTXX9J6BMLJ961"] = {
+        created_date = "2025-04-04 01:07:26",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["C48NB6NCUCE48NUO"] = {
+        created_date = "2025-04-04 01:13:52",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["PE5K9NDACGFF4RG7"] = {
+        created_date = "2025-04-04 01:14:05",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["JTHORX5T46D18N6X"] = {
+        created_date = "2025-04-04 01:14:17",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["UJEDWLDGCDQCSJ2N"] = {
+        created_date = "2025-04-04 01:14:30",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["RFXDXJD6OMMKOQRI"] = {
+        created_date = "2025-04-04 01:14:43",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["MMSGNF9CB47GY4MX"] = {
+        created_date = "2025-04-04 01:14:55",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["V7AQRW0KKJZ6NGB9"] = {
+        created_date = "2025-04-04 01:15:08",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["8U838H0SB3Z2CTSN"] = {
+        created_date = "2025-04-04 01:15:21",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["I6QGXH2H9TIJLJFV"] = {
+        created_date = "2025-04-04 01:15:33",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["G2IWZO93DB5XUD9S"] = {
+        created_date = "2025-04-04 01:15:46",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
+    ["PJHNHUI3XE2E1VL3"] = {
+        created_date = "2025-04-04 01:19:10",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
+    ["5XO5BOWTB9R0HWYI"] = {
+        created_date = "2025-04-04 01:22:13",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
+    ["K8SRFOXH6ZNB5GMX"] = {
+        created_date = "2025-04-04 01:27:18",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
         usernames = {
         }
     },
