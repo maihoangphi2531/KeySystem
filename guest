@@ -47,7 +47,7 @@ local data = {
         used_by = "714479512837947423", 
         duration_days = 28,
         usernames = {
-            "DemonLordAizen20",
+            "Demonlordaizen20",
         }
     },
     ["39T934IDZ9C45QBW"] = {
@@ -156,6 +156,15 @@ local data = {
         is_used = false,
         used_by = "", 
         duration_days = 10,
+        usernames = {
+        }
+    },
+    ["E4M18KAGF962LRV1"] = {
+        created_date = "2025-04-04 00:09:39",
+        expiry_date = "None",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
         usernames = {
         }
     },
