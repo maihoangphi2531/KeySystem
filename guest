@@ -411,6 +411,7 @@ local data = {
         duration_days = 1,
         usernames = {
             "av",
+            "phingau1",
             "a",
         }
     },
