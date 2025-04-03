@@ -460,6 +460,15 @@ local data = {
         usernames = {
         }
     },
+    ["L2TTY0RUTJSKD9NE"] = {
+        created_date = "2025-04-04 01:33:13",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
