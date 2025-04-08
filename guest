@@ -410,7 +410,6 @@ local data = {
         used_by = "880845879404285952", 
         duration_days = 1,
         usernames = {
-            "phingau1",
             "av",
             "a",
         }
