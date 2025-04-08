@@ -660,6 +660,15 @@ local data = {
             "qhroblox1210",
         }
     },
+    ["3NS9EBI90DGLEUN1"] = {
+        created_date = "2025-04-09 00:29:53",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
