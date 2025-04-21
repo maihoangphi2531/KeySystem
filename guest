@@ -680,11 +680,12 @@ local data = {
     },
     ["4GADF1WZRZJXUGH6"] = {
         created_date = "2025-04-21 22:04:53",
-        expiry_date = "",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-04-28 22:12:41",
+        is_used = true,
+        used_by = "473292791640883200", 
         duration_days = 7,
         usernames = {
+            "leanhclone2",
         }
     },
 }
