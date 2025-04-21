@@ -715,6 +715,15 @@ local data = {
         usernames = {
         }
     },
+    ["XHDQ2SRPH97YMWJT"] = {
+        created_date = "2025-04-21 23:01:11",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
