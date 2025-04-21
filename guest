@@ -688,6 +688,15 @@ local data = {
             "leanhclone2",
         }
     },
+    ["L3SNUJ03JKYGJAVX"] = {
+        created_date = "2025-04-21 23:01:07",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
