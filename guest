@@ -744,6 +744,15 @@ local data = {
             "leanhclone3",
         }
     },
+    ["59L0D44ICM96J1GK"] = {
+        created_date = "2025-04-27 02:18:20",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 1,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
