@@ -746,11 +746,12 @@ local data = {
     },
     ["59L0D44ICM96J1GK"] = {
         created_date = "2025-04-27 02:18:20",
-        expiry_date = "",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-04-28 03:41:51",
+        is_used = true,
+        used_by = "714479512837947423", 
         duration_days = 1,
         usernames = {
+            "maximus001900",
         }
     },
 }
