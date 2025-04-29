@@ -754,6 +754,15 @@ local data = {
             "maximus001900",
         }
     },
+    ["Z5OGHPRXJJQKZ4MX"] = {
+        created_date = "2025-04-29 15:39:08",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
