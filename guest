@@ -774,11 +774,12 @@ local data = {
     },
     ["L1I52SUN53GFSO5S"] = {
         created_date = "2025-05-05 23:37:36",
-        expiry_date = "",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-05-06 23:37:58",
+        is_used = true,
+        used_by = "880845879404285952", 
         duration_days = 1,
         usernames = {
+            "maxi",
         }
     },
 }
