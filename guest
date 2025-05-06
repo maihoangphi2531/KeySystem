@@ -772,6 +772,15 @@ local data = {
             "maxi",
         }
     },
+    ["3XA3DAEIYY7YU383"] = {
+        created_date = "2025-05-06 22:52:26",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 28,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
