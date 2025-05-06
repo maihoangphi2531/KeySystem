@@ -436,11 +436,12 @@ local data = {
     },
     ["Q9XMXBQG55PH3G4G"] = {
         created_date = "2025-04-04 01:33:39",
-        expiry_date = "",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-06-03 22:58:30",
+        is_used = true,
+        used_by = "714479512837947423", 
         duration_days = 28,
         usernames = {
+            "Puffshroom2002",
         }
     },
     ["0VG01743GELWGS4F"] = {
