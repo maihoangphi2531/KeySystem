@@ -108,16 +108,6 @@ local data = {
             "EDD_0505",
         }
     },
-    ["M5ZUM7NIUNDCDLZ5"] = {
-        created_date = "2025-03-27 22:14:27",
-        expiry_date = "2025-04-24 22:14:27",
-        is_used = true,
-        used_by = "714479512837947423", 
-        duration_days = 28,
-        usernames = {
-            "dialelo",
-        }
-    },
     ["L2COQ42NOIFNKZAJ"] = {
         created_date = "2025-03-27 22:15:55",
         expiry_date = "2025-04-24 22:15:55",
