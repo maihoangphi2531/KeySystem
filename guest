@@ -446,11 +446,12 @@ local data = {
     },
     ["0VG01743GELWGS4F"] = {
         created_date = "2025-04-04 01:33:41",
-        expiry_date = "",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-06-03 22:58:54",
+        is_used = true,
+        used_by = "714479512837947423", 
         duration_days = 28,
         usernames = {
+            "Buttercup_jelly03",
         }
     },
     ["5J4NWPRXIO13GIS0"] = {
