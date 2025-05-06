@@ -466,11 +466,12 @@ local data = {
     },
     ["D5FGDTYAVCNGKTH1"] = {
         created_date = "2025-04-04 01:33:44",
-        expiry_date = "",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-06-03 22:59:25",
+        is_used = true,
+        used_by = "714479512837947423", 
         duration_days = 28,
         usernames = {
+            "EDD_0505",
         }
     },
     ["L315IIPG5PNAJQJC"] = {
