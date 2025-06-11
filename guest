@@ -310,8 +310,8 @@ local data = {
         used_by = "880845879404285952", 
         duration_days = 1,
         usernames = {
-            "a",
             "av",
+            "a",
         }
     },
     ["W2AB2FGIGTIRJ1G0"] = {
@@ -784,11 +784,12 @@ local data = {
     },
     ["SB424AX72U3BSVW6"] = {
         created_date = "2025-06-11 04:08:48",
-        expiry_date = "",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-06-18 07:31:29",
+        is_used = true,
+        used_by = "473292791640883200", 
         duration_days = 7,
         usernames = {
+            "leanhclone4",
         }
     },
     ["PN5UYE17UFT6T21K"] = {
