@@ -784,11 +784,12 @@ local data = {
     },
     ["X9VWGYVI98ZG8ONP"] = {
         created_date = "2025-06-19 22:11:53",
-        expiry_date = "",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-06-26 22:20:28",
+        is_used = true,
+        used_by = "473292791640883200", 
         duration_days = 7,
         usernames = {
+            "leanhclone4",
         }
     },
     ["SB424AX72U3BSVW6"] = {
