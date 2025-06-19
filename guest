@@ -801,6 +801,15 @@ local data = {
         usernames = {
         }
     },
+    ["X9VWGYVI98ZG8ONP"] = {
+        created_date = "2025-06-19 22:11:53",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
 }
 
 -- Lấy LocalPlayer
