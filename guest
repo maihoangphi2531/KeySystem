@@ -772,8 +772,6 @@ local data = {
         usernames = {
         }
     },
-
-
     ["SB424AX72U3BSVW6"] = {
         created_date = "2025-06-11 04:08:48",
         expiry_date = "2025-06-18 07:31:29",
@@ -788,6 +786,15 @@ local data = {
         expiry_date = "2025-06-20 07:17:44",
         is_used = true,
         used_by = "473292791640883200", 
+        duration_days = 7,
+        usernames = {
+        }
+    },
+    ["HNHJ0XYCYFI4UG1R"] = {
+        created_date = "2025-07-08 05:28:27",
+        expiry_date = "",
+        is_used = false,
+        used_by = "", 
         duration_days = 7,
         usernames = {
         }
