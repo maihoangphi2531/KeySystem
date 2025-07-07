@@ -772,26 +772,8 @@ local data = {
         usernames = {
         }
     },
-    ["PFUECB7YYN9R4SPC"] = {
-        created_date = "2025-06-19 22:11:51",
-        expiry_date = "2025-06-26 22:19:35",
-        is_used = true,
-        used_by = "473292791640883200", 
-        duration_days = 7,
-        usernames = {
-            "leanhclone2",
-        }
-    },
-    ["X9VWGYVI98ZG8ONP"] = {
-        created_date = "2025-06-19 22:11:53",
-        expiry_date = "2025-06-26 22:20:28",
-        is_used = true,
-        used_by = "473292791640883200", 
-        duration_days = 7,
-        usernames = {
-            "leanhclone4",
-        }
-    },
+
+
     ["SB424AX72U3BSVW6"] = {
         created_date = "2025-06-11 04:08:48",
         expiry_date = "2025-06-18 07:31:29",
