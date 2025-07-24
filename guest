@@ -644,16 +644,7 @@ local data = {
             "maximus001900",
         }
     },
-    ["ZTO5UFAO8NN2EC73"] = {
-        created_date = "2025-04-29 15:39:10",
-        expiry_date = "2025-05-14 09:10:24",
-        is_used = true,
-        used_by = "473292791640883200", 
-        duration_days = 7,
-        usernames = {
-            "leanhclone3",
-        }
-    },
+
     ["L1I52SUN53GFSO5S"] = {
         created_date = "2025-05-05 23:37:36",
         expiry_date = "2025-05-06 23:37:58",
@@ -790,26 +781,8 @@ local data = {
         usernames = {
         }
     },
-    ["HNHJ0XYCYFI4UG1R"] = {
-        created_date = "2025-07-08 05:28:27",
-        expiry_date = "2025-07-23 22:31:12",
-        is_used = true,
-        used_by = "473292791640883200", 
-        duration_days = 7,
-        usernames = {
-            "leanhclone2",
-        }
-    },
-    ["M7S2BQZA8JZTWVNN"] = {
-        created_date = "2025-07-08 05:28:29",
-        expiry_date = "2025-07-23 22:31:43",
-        is_used = true,
-        used_by = "473292791640883200", 
-        duration_days = 7,
-        usernames = {
-            "leanhclone4",
-        }
-    },
+
+
     ["ZARALB6LFYS9AH6G"] = {
         created_date = "2025-07-24 21:53:08",
         expiry_date = "",
