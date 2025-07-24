@@ -802,11 +802,12 @@ local data = {
     },
     ["VVN7DX6CQTBG0VI7"] = {
         created_date = "2025-07-24 21:53:10",
-        expiry_date = "",
-        is_used = false,
-        used_by = "", 
+        expiry_date = "2025-07-31 22:35:44",
+        is_used = true,
+        used_by = "473292791640883200", 
         duration_days = 7,
         usernames = {
+            "leanhclone4",
         }
     },
 }
