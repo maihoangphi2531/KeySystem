@@ -790,26 +790,6 @@ local data = {
         usernames = {
         }
     },
-    ["ZARALB6LFYS9AH6G"] = {
-        created_date = "2025-07-24 21:53:08",
-        expiry_date = "2025-07-31 22:35:11",
-        is_used = true,
-        used_by = "473292791640883200", 
-        duration_days = 7,
-        usernames = {
-            "leanhclone2",
-        }
-    },
-    ["VVN7DX6CQTBG0VI7"] = {
-        created_date = "2025-07-24 21:53:10",
-        expiry_date = "2025-07-31 22:35:44",
-        is_used = true,
-        used_by = "473292791640883200", 
-        duration_days = 7,
-        usernames = {
-            "leanhclone4",
-        }
-    },
 }
 
 -- Lấy LocalPlayer
