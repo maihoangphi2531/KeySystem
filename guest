@@ -791,21 +791,21 @@ local data = {
         }
     },
     ["3MRA37HVVY6Q9JYB"] = {
-        created_date = "2025-07-31 16:02:40",
-        expiry_date = "2025-08-07 16:06:04",
+        created_date = "2025-08-06 16:00:00",
+        expiry_date = "2025-08-16 16:00:00",
         is_used = true,
         used_by = "473292791640883200", 
-        duration_days = 7,
+        duration_days = 9,
         usernames = {
             "leanhclone2",
         }
     },
     ["T59ECNEB36GF02WV"] = {
-        created_date = "2025-07-31 16:02:42",
-        expiry_date = "2025-08-07 16:06:39",
+        created_date = "2025-08-06 16:00:00",
+        expiry_date = "2025-08-16 16:00:00",
         is_used = true,
         used_by = "473292791640883200", 
-        duration_days = 7,
+        duration_days = 9,
         usernames = {
             "leanhclone4",
         }
