@@ -1,27 +1,12 @@
-
---[[
-    World Zero  Deobfuscated Version
-    
-    
-    DEOBFUSCATION NOTES:
-    - cp = LinoriaLib (Linoria UI Library)
-    - cq = ThemeManager (LinoriaThemeManager) 
-    - cr = SaveManager (LinoriaSaveManager)
-    - Removed encoded variables: k, l, m, n, c3, c4, c5, c6
-    - Removed bK function (no longer needed)
-    - Libraries now loaded explicitly from GitHub repository
-    
-    This script has been cleaned and deobfuscated for better readability.
-]]--
-
--- Game validation - Only run in World Zero
+--kiểm tra xem có phải là game world zero không, = 0 dừng script 
 if game.gameId ~= 985731078 then
     return
 end
-
+--đợi game tải xong trước khi chạy script
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
+--==================Các Biến===================
 local a;
 local b = game:GetService('Players')
 local c = b.LocalPlayer or b:GetPropertyChangedSignal('LocalPlayer'):Wait() or b.LocalPlayer;
@@ -32,8 +17,159 @@ local g;
 local h;
 local i;
 local j;
--- Removed unused encoded variables: local k, l, m, n, o = '', '', '', '', ''
-local o = '' -- Keep 'o' in case it's used elsewhere
+local o = '' 
+--state tables
+local ToggleStates = {
+    Autofarm = false,
+    Killaura = false,
+    CollectDrops = false,
+    CollectBuffOrb = false,
+    autoEquipBestwWep = false,
+    NVD = false,
+    mobCamera = false,
+    anonHook = false,
+    nightmareLoop = false,
+    skipScarecrowNm = false,
+    NextDungeon = false,
+    RestartDungeon = false,
+    smartPerkSell = false,
+    autoSellEggs = false,
+    collectEggChests = false,
+    ignoreCannon = false,
+    restartAfterFloors = false,
+    autoHide = false,
+    autoSellAll = false,
+}
+
+local OptionValues = {
+    -- Cũ (đã có)
+    Offset = 5,
+    FastSprint = 25,
+    dungeonHook = "",
+    drophook = "",
+    dropHookRoleId = "",
+    dungeonStartTimer = 0,
+    towerStartTimer = 0,
+    completedInfiniteTowerFloors = 10,
+    healPercent = 30,
+    resumePercent = 80,
+    dungeonRestartTimer = 3,
+    towerRestartTimer = 3,
+    AutoSellTbl = {},
+    selectedCosmetics = {},
+    
+    -- MỚI - Cần thêm
+    testOffset = 0,
+    mobWepId = "",
+    bossWepId = "",
+    KillauraDelay = 0,
+    timeoutTimer = 60,
+    wheelCount = 100,
+    wheelDelay = 0,
+        -- T5 Perks thresholds
+    Agility = 2,
+    AttackUp = 2,
+    BonusHealthRegen = 1,
+    BossSlayer = 10,
+    BurnChance = 2,
+    CriticalStack = 5,
+    DamageReduction = 2,
+    ElementalResistance = 10,
+    EliteAssassin = 10,
+    Energized = 5,
+    Ferocious = 20,
+    Fortress = 10,
+    Glass = 30,
+    GoldHoarder = 5,
+    HPUp = 5,
+    LifeDrain = 2,
+    LuckyLooter = 2,
+    MasterThief = 10,
+    MobSlayer = 10,
+    Oblivion = 1,
+    OpeningStrike = 10,
+    PoisonousThorns = 5,
+    ResistBurn = 30,
+    ResistFrost = 30,
+    ResistKnockdown = 30,
+    ResistPoison = 30,
+    RoughSkin = 4,
+    SelfDestruct = 10,
+    ShiftedAggro = 15,
+    Untouchable = 5,
+    Vampiric = 5,
+}
+
+-- ====== WRAPPER ĐÃ SỬA - PHIÊN BẢN HOẠT ĐỘNG ======
+local Toggles = {}
+local Options = {}
+
+-- Hàm tạo toggle object
+local function createToggle(key, defaultValue)
+    return {
+        Value = defaultValue,
+        SetValue = function(self, newValue)
+            ToggleStates[key] = newValue
+            self.Value = newValue
+        end
+    }
+end
+
+-- Hàm tạo option object
+local function createOption(key, defaultValue)
+    return {
+        Value = defaultValue,
+        SetValue = function(self, newValue)
+            OptionValues[key] = newValue
+            self.Value = newValue
+        end
+    }
+end
+
+-- Metatable cho Toggles
+setmetatable(Toggles, {
+    __index = function(tbl, key)
+        if not rawget(tbl, key) then
+            local toggle = createToggle(key, ToggleStates[key] or false)
+            rawset(tbl, key, toggle)
+        end
+        return rawget(tbl, key)
+    end
+})
+
+-- Metatable cho Options
+setmetatable(Options, {
+    __index = function(tbl, key)
+        if not rawget(tbl, key) then
+            local option = createOption(key, OptionValues[key] or "")
+            rawset(tbl, key, option)
+        end
+        return rawget(tbl, key)
+    end
+})
+
+-- Khởi tạo tất cả toggle cần thiết
+for key, value in pairs(ToggleStates) do
+    local toggle = createToggle(key, value)
+    Toggles[key] = toggle
+end
+
+-- Khởi tạo tất cả option cần thiết
+for key, value in pairs(OptionValues) do
+    local option = createOption(key, value)
+    Options[key] = option
+end
+
+-- Test wrapper
+print("========== WRAPPER TEST ==========")
+print("Toggles.Autofarm:", Toggles.Autofarm)
+print("Toggles.Autofarm.Value:", Toggles.Autofarm.Value)
+print("Type of Toggles.Autofarm:", type(Toggles.Autofarm))
+
+Toggles.Autofarm:SetValue(true)
+print("After SetValue(true):", Toggles.Autofarm.Value)
+print("ToggleStates.Autofarm:", ToggleStates.Autofarm)
+print("==================================")
 function utcDateAndTime()
     local p = os.date("!*t", os.time())
     local q, r, s, t, u = p.hour, p.min, p.sec, p.day, p.month;
@@ -54,6 +190,7 @@ function utcDateAndTime()
     end
     return q .. ':' .. r .. ':' .. s .. ' - ' .. t .. '/' .. u .. '/' .. p.year
 end
+
 function waitForChild(v, w, waittime)
     local x = v;
     local y;
@@ -69,11 +206,13 @@ function waitForChild(v, w, waittime)
         end
     end
 end
+
 function firstCheckWait(B)
     repeat
         task.wait()
     until firstCheckDone or not Toggles[B].Value
 end
+
 function findFirstChild(v, w)
     local x = v;
     for z = 1, #w do
@@ -88,6 +227,7 @@ function findFirstChild(v, w)
         end
     end
 end
+
 local C = {
     Green = 0x00FF00,
     Red = 0xFF0000,
@@ -98,6 +238,7 @@ local C = {
     Purple = 0x8C00FF,
     LightPink = 0xff7fff
 }
+
 task.spawn(function()
     repeat
         task.wait()
@@ -190,6 +331,7 @@ task.spawn(function()
         D(N, olympus and C.Gold or C.Cyan, olympus and cloudy or boink)
     end)
 end)
+
 local a4 = game:GetService("ReplicatedStorage")
 local a5 = a4:WaitForChild('Shared')
 local a6 = game:GetService('TeleportService')
@@ -289,7 +431,11 @@ local aR = {
     Crystal = -9,
     Taurha = -2,
     BOSSShadowOfCerberus = 7,
-    Hades = -1
+    Hades = -1,
+    BOSSFallenKing = 0,
+    FallenQueenGuard = 0,
+    BOSSFallenPrince = 0,
+    BOSSFallenQueen = 0
 }
 local aS = {}
 local aT = c.Character or c.CharacterAdded:Wait() or c.Character;
@@ -395,6 +541,10 @@ task.spawn(function()
         end
     end
 end)
+-- THÊM SAU DÒNG: if aW then
+-- (khoảng dòng 544-550, sau khi init các biến mission)
+
+
 do
     function noclip()
         if aU and aU.CanCollide then
@@ -488,9 +638,7 @@ do
         return Q
     end
 end
--- local function bK(bL)
---     return loadstring(game:HttpGet(bL))()
--- end
+
 local bM = a_:WaitForChild('Inventory'):WaitForChild('Items')
 local bN = a_:WaitForChild('Inventory'):WaitForChild('Cosmetics')
 local bO = require(a5.Missions.MissionData)
@@ -620,6 +768,12 @@ local ca = {
     ArcaneTower = {
         Id = 43,
         priorityTbl = {'Crystal', 'BOSSKandrix'}
+    },
+    FALLENKING_KILLS = {
+        Id = 22,
+        priorityTbl = {'FallenKingMinion', 'BOSSFallenKing', 'FallenQueenGuard', 'BOSSFallenPrince', 'BOSSFallenQueen'},
+        mobWaitTbl = {'FallenKingMinion'}, -- ✅ Đợi minion spawn
+        mobWaitTime = 1
     },
     KrakenEvent = {
         Id = 45,
@@ -2841,1524 +2995,43 @@ if aJ then
     co.BrickColor = BrickColor.new('Cyan')
     co.Parent = workspace
 end
-
--- ============================================================================
--- LIBRARY LOADING SECTION (DEOBFUSCATED)
--- ============================================================================
--- These variables replace the encoded ones:
--- cp = Linoria UI Library (main library for creating GUI)
--- cq = ThemeManager (handles theme switching and management)  
--- cr = SaveManager (handles saving/loading configurations)
-local cp; -- Linoria Library (was previously encoded)
-local cq; -- LinoriaThemeManager (was previously encoded)
-local cr; -- LinoriaSaveManager (was previously encoded)
-
--- GitHub repository URL for loading libraries
-local ce = 'https://raw.githubusercontent.com/maihoangphi2531/infscriptv2/main/'
-
--- Check if ReplicatedStorage is available for file operations
-if a4 then
-    -- Helper function to load libraries with caching
-    local function ch(scriptUrl, fileName)
-        local success, fileContent = pcall(function()
-            return readfile(fileName)
-        end)
-        
-        -- Use cached file if it exists and UpdateLib is not forced
-        if success and not UpdateLib then
-            return loadstring(fileContent)()
-        else
-            -- Download fresh copy from GitHub
-            fileContent = game:HttpGet(scriptUrl)
-            writefile(fileName, fileContent)
-            return loadstring(fileContent)()
-        end
-    end
-    
-    -- Load each library with caching
-    cp = ch(ce .. 'Linoria', 'LinoriaV6.lua')                    -- Main UI Library
-    cq = ch(ce .. 'LinoriaThemeManager', 'LinoriaThemeManagerV5.lua')  -- Theme Manager
-    cr = ch(ce .. 'LinoriaSaveManager', 'LinoriaSaveManagerV5.lua')     -- Save Manager
-else
-    -- Fallback: Direct loading without file caching (for executors without file system access)
-    cp = loadstring(game:HttpGet(ce .. 'Linoria'))()              -- Main UI Library
-    cq = loadstring(game:HttpGet(ce .. 'LinoriaThemeManager'))()   -- Theme Manager  
-    cr = loadstring(game:HttpGet(ce .. 'LinoriaSaveManager'))()    -- Save Manager
-end
-
--- ============================================================================
--- END OF LIBRARY LOADING SECTION
--- ============================================================================
-
-a = true; -- Flag to indicate libraries are loaded
-function libWarn(msg)
-    warn('[Infinite]: ' .. msg)
-end
-function pcallWithError(cs)
-    local bE, ct = pcall(cs)
-    if not bE and ct then
-        libWarn(ct)
-    end
-end
-function libNoti(msg)
-    print(msg)
-    pcallWithError(function()
-        cp:Notify(msg)
-    end)
-end
-function setMissionObjective(cu, cv)
-    local V = c.PlayerGui.MissionObjective.MissionObjective.Label;
-    V.Text = cu;
-    V.Overlay.Text = cu;
-    if cv then
-        V.ZIndex = 30;
-        V.Overlay.ZIndex = 31
-    end
-end
-function resetMissionObjective()
-    local V = c.PlayerGui.MissionObjective.MissionObjective.Label;
-    V.Text = ''
-    V.Overlay.Text = ''
-end
-function isRangedClass()
-    return cl[b9] and cl[b9].Type == 'Ranged'
-end
-local cw = game:GetService('GuiService')
-local cx;
-cx = cw.ErrorMessageChanged:Connect(function(msg)
-    if cw:GetErrorCode() == Enum.ConnectionError.DisconnectLuaKick or cw:GetErrorCode() ==
-        Enum.ConnectionError.DisconnectConnectionLost or msg:lower():find("exploit") then
-        cx:Disconnect()
-        ao.Kicked = true;
-        save()
-        if msg:lower():find("exploit") then
-            local cy = 'Killaura Delay: ``' .. Options.KillauraDelay.Value .. '``\nClass: ``' .. cl[b9].DisplayName ..
-                           '``\nPing: ``' .. ping2() .. '``'
-            if aC then
-                cy = cy .. '\nCode: ``' .. i .. '``\nMission: ``' .. h .. '``'
-            end
-            cy = cy .. '\n' .. f;
-            request({
-                Url = boink2,
-                Method = "POST",
-                Headers = {
-                    ["Content-Type"] = "application/json"
-                },
-                Body = e:JSONEncode({
-                    ["embeds"] = {{
-                        ["title"] = 'Exploit Kick',
-                        ["description"] = cy,
-                        ["type"] = 'rich',
-                        ["color"] = tonumber(C.LightPink),
-                        ["footer"] = {
-                            ["text"] = utcDateAndTime() .. ' UTC'
-                        }
-                    }}
-                })
-            })
-        end
-        a6:Teleport(an, c)
-    end
-end)
-local cz = cp:CreateWindow({
-    Title = 'assssxs ',
-    Resizable = true,
-    Center = false,
-    AutoShow = true,
-    TabPadding = 8,
-    MenuFadeTime = 0,
-    CornerRadius = 15
-})
-local cA = {
-    Main = cz:AddTab('Main'),
-    Sell = cz:AddTab('Sell'),
-    Teleports = cz:AddTab('Teleports'),
-    ['Settings'] = cz:AddTab('Settings')
-}
-local cB = cA.Main:AddLeftTabbox('farmmm')
-local cC = cA.Sell:AddLeftTabbox('selll')
-local cD = cA.Sell:AddRightTabbox('selll2')
-local cE = cB:AddTab('Farm')
-local cF = cB:AddTab('Settings')
-local cG = cC:AddTab('Auto Sell')
-local cH = cD:AddTab('Sell/Recycle Cosmetics')
-local cI = cB:AddTab('Weapons')
-local cJ = cB:AddTab('Event')
-local cK = cA.Main:AddRightTabbox('box')
-local cL = cK:AddTab('Visual')
-local cM = cK:AddTab('Webhook')
-local cN = cK:AddTab('Misc')
-local cO = cK:AddTab('Gui')
-local cP = cA.Main:AddRightTabbox('temp')
-local cQ = cP:AddTab('Stats')
-local cR = cA.Teleports:AddLeftGroupbox('Worlds')
-local cS = cA.Teleports:AddRightGroupbox('Towers')
-local cT = cA.Teleports:AddRightGroupbox('Nightmare Dungeons')
-cE:AddToggle('Killaura', {
-    Text = 'Killaura',
-    Default = false
-})
-cE:AddSlider('KillauraDelay', {
-    Text = 'Delay',
-    Default = 0,
-    Min = 0,
-    Max = 1,
-    Rounding = 2,
-    HideMax = true,
-    Compact = true
-})
-if olympus then
-    cE:AddSlider('testOffset', {
-        Text = 'Test Offset',
-        Default = 0,
-        Min = -25,
-        Max = 25,
-        Rounding = 0,
-        HideMax = true,
-        Compact = true
-    })
-end
-cE:AddToggle('Autofarm', {
-    Text = 'Autofarm',
-    Default = false
-})
-cE:AddSlider('Offset', {
-    Text = 'Offset',
-    Default = isRangedClass() and 50 or 7,
-    Min = 0,
-    Max = aC and (isRangedClass() and 75 or 25) or 75,
-    Rounding = 1,
-    Compact = true
-})
-cE:AddSlider('healPercent', {
-    Text = 'Heal At',
-    Default = 30,
-    Min = 0,
-    Max = 100,
-    Rounding = 0,
-    HideMax = true,
-    Compact = true,
-    Suffix = '% HP'
-})
-cE:AddSlider('resumePercent', {
-    Text = 'Resume At',
-    Default = 100,
-    Min = 0,
-    Max = 100,
-    Rounding = 0,
-    HideMax = true,
-    Compact = true,
-    Suffix = '% HP'
-})
-cE:AddToggle('CollectDrops', {
-    Text = 'Collect Drops',
-    Default = false
-})
-cE:AddToggle('collectEggChests', {
-    Text = 'Collect Egg Chests',
-    Default = true
-})
-cE:AddToggle('RestartDungeon', {
-    Text = 'Restart Dungeon',
-    Default = false
-})
-cE:AddToggle('nightmareLoop', {
-    Text = 'Nightmare Loop',
-    Default = false
-})
-cE:AddToggle('NextDungeon', {
-    Text = 'Next Dungeon',
-    Default = false
-})
-cE:AddToggle('PerkSwitcher', {
-    Text = 'Auto Switch Perks',
-    Default = false,
-    Tooltip = 'Enables Primary Perks on Mobs, and Offhand Perks on Bosses'
-})
-cE:AddToggle('autoEquipBestwWep', {
-    Text = 'Auto Equip Best Weapon/Armor',
-    Default = false
-})
-cE:AddToggle('mobCamera', {
-    Text = 'Mob POV',
-    Default = false
-})
-cE:AddSlider('FastSprint', {
-    Text = 'Sprint Speed',
-    Default = 28,
-    Min = 28,
-    Max = 200,
-    Rounding = 0,
-    Compact = true
-})
-cE:AddButton({
-    Text = 'Restart Dungeon',
-    Func = function()
-        if aC then
-            StartRaid(ay, az)
-        end
-    end,
-    DoubleClick = false
-})
-cF:AddSlider('dungeonRestartTimer', {
-    Text = 'Restart Dungeon Delay',
-    Default = 0,
-    Min = 0,
-    Max = 300,
-    Rounding = 0,
-    HideMax = true,
-    Suffix = ' seconds',
-    Compact = true
-})
-cF:AddSlider('towerRestartTimer', {
-    Text = 'Restart Tower Delay',
-    Default = 0,
-    Min = 0,
-    Max = 30,
-    Rounding = 0,
-    HideMax = true,
-    Suffix = ' seconds',
-    Compact = true
-})
-cF:AddSlider('dungeonStartTimer', {
-    Text = 'Dungeon Start Delay',
-    Default = 0,
-    Min = 0,
-    Max = 300,
-    Rounding = 0,
-    HideMax = true,
-    Suffix = ' seconds',
-    Compact = true
-})
-cF:AddSlider('towerStartTimer', {
-    Text = 'Tower Start Delay',
-    Default = 0,
-    Min = 0,
-    Max = 600,
-    Rounding = 0,
-    HideMax = true,
-    Suffix = ' seconds',
-    Compact = true
-})
-Options.dungeonStartTimer:OnChanged(function(cU)
-    bs = bs + 1
-end)
-Options.towerStartTimer:OnChanged(function(cU)
-    bt = bt + 1
-end)
-cF:AddSlider('timeoutTimer', {
-    Text = 'Dungeon Timeout',
-    Default = 120,
-    Min = 10,
-    Max = 300,
-    Rounding = 0,
-    HideMax = true,
-    Suffix = ' seconds',
-    Tooltip = 'Restart dungeon if no damage has been done within the specified time period',
-    Compact = true
-})
-cF:AddToggle('restartAfterFloors', {
-    Text = 'Inf Tower Smart Restart',
-    Tooltip = 'Restarts Infinite Floor after specified amount of floors are completed',
-    Default = false
-})
-cF:AddInput('completedInfiniteTowerFloors', {
-    Text = 'Floors',
-    Default = 31,
-    Numeric = true,
-    Finished = true
-})
-cF:AddToggle('ignoreCannon', {
-    Text = 'Ignore Cannon (Atlantis Tower)',
-    Default = false
-})
-cF:AddToggle('skipScarecrowNm', {
-    Text = 'Skip Scarecrow Defense (NM Loop)',
-    Default = false
-})
-cF:AddToggle('rejoinDungeon', {
-    Text = 'Rejoin Last Dungeon',
-    Tooltip = 'Automatically starts the last dungeon started within your desired time limit',
-    Default = false
-})
-Toggles.rejoinDungeon:OnChanged(function(ck)
-    ao.RejoinLastDungeon = ck;
-    save()
-end)
-local cV = {
-    ['30 minutes'] = 1800,
-    ['3 hours'] = 10800,
-    ['12 hours'] = 43200,
-    ['24 hours'] = 86400,
-    ['Infinite'] = 999999999
-}
-cF:AddDropdown('rjdLimit', {
-    Text = 'Rejoin Last Dungeon Limit',
-    Values = {'30 minutes', '3 hours', '12 hours', '24 hours', 'Infinite'},
-    Default = '30 minutes',
-    AllowNull = false,
-    Multi = false
-})
-Options.rjdLimit:OnChanged(function(ck)
-    ao.RejoinLastDungeonThreshold = cV[ck]
-    save()
-end)
-cF:AddToggle('forceRestartLastTower', {
-    Text = 'Force Restart Last Tower',
-    Tooltip = 'Restart the Tower when going back to town (willingly or by force)',
-    Default = false
-})
-Toggles.forceRestartLastTower:OnChanged(function(ck)
-    ao.ForceRestartLastTower = ck;
-    save()
-end)
-cF:AddSlider('playerCountKick', {
-    Text = 'Mission PlayerCount Kick',
-    Default = 6,
-    Min = 2,
-    Max = 6,
-    Rounding = 0,
-    HideMax = true,
-    Tooltip = 'Disconnect from the game if player count reaches the threshold in mission',
-    Compact = true
-})
-task.spawn(function()
-    while aC do
-        if #b:GetPlayers() >= Options.playerCountKick.Value then
-            task.wait(0.5)
-            c:Kick('Someone might have joined your mission!')
-            break
-        end
-        task.wait()
-    end
-end)
-cI:AddInput('mobWepId', {
-    Numeric = false,
-    Finished = true,
-    Text = 'Current Mob Weapon'
-})
-cI:AddInput('bossWepId', {
-    Numeric = false,
-    Finished = true,
-    Text = 'Current Boss Weapon'
-})
-cI:AddButton({
-    Text = 'Set Current Primary for Mobs',
-    Tooltip = 'Killaura will auto equip this weapon when targeting mobs',
-    Func = function()
-        local cW = b4 and b4:GetChildren()[1]
-        local cX = cW and cW.ID.Value;
-        if cX then
-            Options.mobWepId:SetValue(cX)
-            libNoti('Set ' .. bR[cW.Name].DisplayKey .. ' as your Mob weapon!')
-        else
-            libNoti('No suitable Primary Weapon Detected')
-        end
-    end,
-    DoubleClick = false
-})
-cI:AddButton({
-    Text = 'Set Current Primary for Bosses',
-    Tooltip = 'Killaura will auto equip this weapon when targeting bosses',
-    Func = function()
-        local cW = b4 and b4:GetChildren()[1]
-        local cX = cW and cW.ID.Value;
-        if cX then
-            Options.bossWepId:SetValue(cX)
-            libNoti('Set ' .. bR[cW.Name].DisplayKey .. ' as your Boss weapon!')
-        else
-            libNoti('No suitable Primary Weapon Detected')
-        end
-    end,
-    DoubleClick = false
-})
-cI:AddButton({
-    Text = 'Reset Selected Weapons',
-    Func = function()
-        Options.mobWepId:SetValue('')
-        Options.bossWepId:SetValue('')
-        libNoti('Selected weapons reset!')
-    end,
-    DoubleClick = false
-})
-cM:AddInput('dungeonHook', {
-    Numeric = false,
-    Finished = true,
-    Text = 'Mission Webhook',
-    Tooltip = 'Put your own webhook link to log mission completions/fails'
-})
-cM:AddInput('drophook', {
-    Numeric = false,
-    Finished = true,
-    Text = 'Drop Webhook',
-    Tooltip = 'Put your own webhook link to log T5 drops'
-})
-cM:AddInput('dropHookRoleId', {
-    Numeric = false,
-    Finished = true,
-    Text = 'Custom Role ID for DropHook',
-    Tooltip = 'Mention your chosen role instead of @everyone when getting a desired perk T5'
-})
-cM:AddToggle('anonHook', {
-    Text = 'Anonymous Webhook',
-    Tooltip = "Won't show your User Info in the webhook",
-    Default = false
-})
-cG:AddDropdown('AutoSellTbl', {
-    Text = 'Auto Sell Tiers',
-    Values = {1, 2, 3, 4, 5},
-    AllowNull = true,
-    Multi = true
-})
-cG:AddButton({
-    Text = 'Sell All',
-    Tooltip = 'Sells all weapons and armors of selected tiers',
-    Func = function()
-        local cY = {}
-        for z, R in bM:GetChildren() do
-            local cZ = bR[R.Name]
-            if (cZ.Type == 'Weapon' or cZ.Type == 'Armor') and Options.AutoSellTbl.Value[c0:GetItemTier(R)] and
-                not R:FindFirstChild('Locked') then
-                table.insert(cY, R)
-            end
-        end
-        if #cY > 0 then
-            libNoti('Sold ' .. #cY .. ' items')
-            a5.Drops.SellItems:InvokeServer(cY)
-        end
-    end,
-    DoubleClick = true
-})
-cG:AddToggle('autoSellAll', {
-    Text = 'Auto Sell All',
-    Tooltip = "Failsafe incase auto sell doesn't sell in time at the end of a mission",
-    Default = false
-})
-Toggles.autoSellAll:OnChanged(function(cU)
-    if cU then
-        local cY = {}
-        for z, R in bM:GetChildren() do
-            local cZ = bR[R.Name]
-            if (cZ.Type == 'Weapon' or cZ.Type == 'Armor') and Options.AutoSellTbl.Value[c0:GetItemTier(R)] and
-                not R:FindFirstChild('Locked') then
-                table.insert(cY, R)
-            end
-        end
-        if #cY > 0 then
-            libNoti('Sold ' .. #cY .. ' items')
-            a5.Drops.SellItems:InvokeServer(cY)
-        end
-    end
-end)
-cG:AddToggle('autoSellEggs', {
-    Text = 'Auto Sell Eggs',
-    Default = false,
-    Tooltip = 'Works in Event Wheel Hub also'
-})
-cG:AddDivider()
-cG:AddToggle('smartPerkSell', {
-    Text = 'Smart T5 Auto Sell',
-    Default = false,
-    Tooltip = 'Do NOT enable this until you have turned all of your desired perks slider atleast 1 higher than lowest value'
-})
-local c_ = {}
-for z, R in bQ do
-    table.insert(c_, R.DisplayName)
-end
-table.sort(c_)
-for z = 1, #c_ do
-    for d0, d1 in bQ do
-        if c_[z] == d1.DisplayName then
-            cG:AddSlider(d0, {
-                Text = d1.DisplayName,
-                Default = math.round(d1.StatRange[1] * 100),
-                Min = math.round(d1.StatRange[1] * 100),
-                Max = math.round(d1.StatRange[2] * 100),
-                Rounding = 0,
-                HideMax = true,
-                Compact = true,
-                Suffix = '%'
-            })
-        end
-    end
-end
-local d2 = {
-    GigaSlimeHead = 'Giga Slime Head',
-    NightTerrorHood = 'Night Terror Hood',
-    FlameDemonHood = 'Flame Demon Hood',
-    SpartanHelmet = 'Mezuvian Helmet',
-    AngelHood = 'Angel Hood',
-    AngelHalo = 'Angel Halo',
-    AngelicWings = 'Angelic Wings',
-    TaurhaStaff = "Taurha's Staff",
-    AetherCrown = 'Aether Crown',
-    W9T5Helmet = 'Aether Helmet'
-}
-local d3 = {}
-for z, R in d2 do
-    table.insert(d3, R)
-end
-table.sort(d3)
-cH:AddDropdown('selectedCosmetics', {
-    Text = 'Select Cosmetics',
-    Values = d3,
-    AllowNull = true,
-    Multi = true
-})
-local d4 = {
-    FrostyScarf = 'Frosty Scarf',
-    WolfspiritHelmet = 'Wolfspirit Helmet',
-    WolfspiritArmor = 'Wolfspirit Armor',
-    FestiveDress = 'Festive Dress',
-    RamHorns = 'Ram Horns',
-    CandycaneAntlers = 'Candycane Antlers',
-    CarrotNose = 'Carrot Nose',
-    FluffyJacket = 'Fluffy Jacket'
-}
-local d3 = {}
-for z, R in d4 do
-    table.insert(d3, R)
-end
-table.sort(d3)
-cH:AddDropdown('selectedWheelCosmetics', {
-    Text = 'Select Event Cosmetics',
-    Values = d3,
-    AllowNull = true,
-    Multi = true
-})
-local d5 = {{
-    Hex = '#FF1337',
-    Name = 'Rainbow',
-    SpecialType = true
-}, {
-    Hex = '#DDEADD',
-    Name = 'Ghoul',
-    SpecialType = true
-}, {
-    Hex = '#11CCEE',
-    Name = 'Ice',
-    SpecialType = true
-}, {
-    Hex = '#FFADED',
-    Name = 'Faded',
-    SpecialType = true
-}, {
-    Hex = '#F0F8FF',
-    Name = 'Alice Blue'
-}, {
-    Hex = '#FAEBD7',
-    Name = 'Antique White'
-}, {
-    Hex = '#00FFFF',
-    Name = 'Aqua'
-}, {
-    Hex = '#7FFFD4',
-    Name = 'Aquamarine'
-}, {
-    Hex = '#F0FFFF',
-    Name = 'Azure'
-}, {
-    Hex = '#F5F5DC',
-    Name = 'Beige'
-}, {
-    Hex = '#FFE4C4',
-    Name = 'Bisque'
-}, {
-    Hex = '#000000',
-    Name = 'Black'
-}, {
-    Hex = '#FFEBCD',
-    Name = 'Blanched Almond'
-}, {
-    Hex = '#0000FF',
-    Name = 'Blue'
-}, {
-    Hex = '#8A2BE2',
-    Name = 'Blue Violet'
-}, {
-    Hex = '#A52A2A',
-    Name = 'Brown'
-}, {
-    Hex = '#DEB887',
-    Name = 'Burly Wood'
-}, {
-    Hex = '#5F9EA0',
-    Name = 'Cadet Blue'
-}, {
-    Hex = '#7FFF00',
-    Name = 'Chartreuse'
-}, {
-    Hex = '#D2691E',
-    Name = 'Chocolate'
-}, {
-    Hex = '#FF7F50',
-    Name = 'Coral'
-}, {
-    Hex = '#6495ED',
-    Name = 'Cornflower Blue'
-}, {
-    Hex = '#FFF8DC',
-    Name = 'Cornsilk'
-}, {
-    Hex = '#DC143C',
-    Name = 'Crimson'
-}, {
-    Hex = '#00FFFF',
-    Name = 'Cyan'
-}, {
-    Hex = '#00008B',
-    Name = 'Dark Blue'
-}, {
-    Hex = '#008B8B',
-    Name = 'Dark Cyan'
-}, {
-    Hex = '#B8860B',
-    Name = 'Dark Goldenrod'
-}, {
-    Hex = '#A9A9A9',
-    Name = 'Dark Gray'
-}, {
-    Hex = '#006400',
-    Name = 'Dark Green'
-}, {
-    Hex = '#BDB76B',
-    Name = 'Dark Khaki'
-}, {
-    Hex = '#8B008B',
-    Name = 'Dark Magenta'
-}, {
-    Hex = '#556B2F',
-    Name = 'Dark Olive Green'
-}, {
-    Hex = '#FF8C00',
-    Name = 'Dark Orange'
-}, {
-    Hex = '#9932CC',
-    Name = 'Dark Orchid'
-}, {
-    Hex = '#8B0000',
-    Name = 'Dark Red'
-}, {
-    Hex = '#E9967A',
-    Name = 'Dark Salmon'
-}, {
-    Hex = '#8FBC8F',
-    Name = 'Dark Sea Green'
-}, {
-    Hex = '#483D8B',
-    Name = 'Dark Slate Blue'
-}, {
-    Hex = '#2F4F4F',
-    Name = 'Dark Slate Gray'
-}, {
-    Hex = '#00CED1',
-    Name = 'Dark Turquoise'
-}, {
-    Hex = '#9400D3',
-    Name = 'Dark Violet'
-}, {
-    Hex = '#FF1493',
-    Name = 'Deep Pink'
-}, {
-    Hex = '#00B7EB',
-    Name = 'Deep Sky Blue'
-}, {
-    Hex = '#696969',
-    Name = 'Dim Gray'
-}, {
-    Hex = '#1E90FF',
-    Name = 'Dodger Blue'
-}, {
-    Hex = '#B22222',
-    Name = 'Firebrick'
-}, {
-    Hex = '#FFFAF0',
-    Name = 'Floral White'
-}, {
-    Hex = '#228B22',
-    Name = 'Forest Green'
-}, {
-    Hex = '#FF00FF',
-    Name = 'Fuchsia'
-}, {
-    Hex = '#DCDCDC',
-    Name = 'Gainsboro'
-}, {
-    Hex = '#F8F8FF',
-    Name = 'Ghost White'
-}, {
-    Hex = '#FFD700',
-    Name = 'Gold'
-}, {
-    Hex = '#DAA520',
-    Name = 'Goldenrod'
-}, {
-    Hex = '#808080',
-    Name = 'Gray'
-}, {
-    Hex = '#008000',
-    Name = 'Green'
-}, {
-    Hex = '#ADFF2F',
-    Name = 'Green Yellow'
-}, {
-    Hex = '#F0FFF0',
-    Name = 'Honeydew'
-}, {
-    Hex = '#FF69B4',
-    Name = 'Hot Pink'
-}, {
-    Hex = '#CD5C5C',
-    Name = 'Indian Red'
-}, {
-    Hex = '#4B0082',
-    Name = 'Indigo'
-}, {
-    Hex = '#FFFFF0',
-    Name = 'Ivory'
-}, {
-    Hex = '#F0E68C',
-    Name = 'Khaki'
-}, {
-    Hex = '#E6E6FA',
-    Name = 'Lavender'
-}, {
-    Hex = '#FFF0F5',
-    Name = 'Lavender Blush'
-}, {
-    Hex = '#7CFC00',
-    Name = 'Lawn Green'
-}, {
-    Hex = '#FFFACD',
-    Name = 'Lemon Chiffon'
-}, {
-    Hex = '#ADD8E6',
-    Name = 'Light Blue'
-}, {
-    Hex = '#F08080',
-    Name = 'Light Coral'
-}, {
-    Hex = '#E0FFFF',
-    Name = 'Light Cyan'
-}, {
-    Hex = '#FAFAD2',
-    Name = 'Light Goldenrod Yellow'
-}, {
-    Hex = '#D3D3D3',
-    Name = 'Light Gray'
-}, {
-    Hex = '#90EE90',
-    Name = 'Light Green'
-}, {
-    Hex = '#FFB6C1',
-    Name = 'Light Pink'
-}, {
-    Hex = '#FFA07A',
-    Name = 'Light Salmon'
-}, {
-    Hex = '#20B2AA',
-    Name = 'Light Sea Green'
-}, {
-    Hex = '#87CEFA',
-    Name = 'Light Sky Blue'
-}, {
-    Hex = '#778899',
-    Name = 'Light Slate Gray'
-}, {
-    Hex = '#B0C4DE',
-    Name = 'Light Steel Blue'
-}, {
-    Hex = '#FFFFE0',
-    Name = 'Light Yellow'
-}, {
-    Hex = '#00FF00',
-    Name = 'Lime'
-}, {
-    Hex = '#32CD32',
-    Name = 'Lime Green'
-}, {
-    Hex = '#FAF0E6',
-    Name = 'Linen'
-}, {
-    Hex = '#FF00FF',
-    Name = 'Magenta'
-}, {
-    Hex = '#800000',
-    Name = 'Maroon'
-}, {
-    Hex = '#66CDAA',
-    Name = 'Medium Aquamarine'
-}, {
-    Hex = '#0000CD',
-    Name = 'Medium Blue'
-}, {
-    Hex = '#BA55D3',
-    Name = 'Medium Orchid'
-}, {
-    Hex = '#9370DB',
-    Name = 'Medium Purple'
-}, {
-    Hex = '#3CB371',
-    Name = 'Medium Sea Green'
-}, {
-    Hex = '#7B68EE',
-    Name = 'Medium Slate Blue'
-}, {
-    Hex = '#00FA9A',
-    Name = 'Medium Spring Green'
-}, {
-    Hex = '#48D1CC',
-    Name = 'Medium Turquoise'
-}, {
-    Hex = '#C71585',
-    Name = 'Medium Violet Red'
-}, {
-    Hex = '#191970',
-    Name = 'Midnight Blue'
-}, {
-    Hex = '#F5FFFA',
-    Name = 'Mint Cream'
-}, {
-    Hex = '#FFE4E1',
-    Name = 'Misty Rose'
-}, {
-    Hex = '#FFE4B5',
-    Name = 'Moccasin'
-}, {
-    Hex = '#FFDEAD',
-    Name = 'Navajo White'
-}, {
-    Hex = '#000080',
-    Name = 'Navy'
-}, {
-    Hex = '#FDF5E6',
-    Name = 'Old Lace'
-}, {
-    Hex = '#808000',
-    Name = 'Olive'
-}, {
-    Hex = '#6B8E23',
-    Name = 'Olive Drab'
-}, {
-    Hex = '#FFA500',
-    Name = 'Orange'
-}, {
-    Hex = '#FF4500',
-    Name = 'Orange Red'
-}, {
-    Hex = '#DA70D6',
-    Name = 'Orchid'
-}, {
-    Hex = '#EEE8AA',
-    Name = 'Pale Goldenrod'
-}, {
-    Hex = '#98FB98',
-    Name = 'Pale Green'
-}, {
-    Hex = '#AFEEEE',
-    Name = 'Pale Turquoise'
-}, {
-    Hex = '#DB7093',
-    Name = 'Pale Violet Red'
-}, {
-    Hex = '#FFEFD5',
-    Name = 'Papaya Whip'
-}, {
-    Hex = '#FFDAB9',
-    Name = 'Peach Puff'
-}, {
-    Hex = '#CD853F',
-    Name = 'Peru'
-}, {
-    Hex = '#FFC0CB',
-    Name = 'Pink'
-}, {
-    Hex = '#DDA0DD',
-    Name = 'Plum'
-}, {
-    Hex = '#B0E0E6',
-    Name = 'Powder Blue'
-}, {
-    Hex = '#800080',
-    Name = 'Purple'
-}, {
-    Hex = '#FF0000',
-    Name = 'Red'
-}, {
-    Hex = '#BC8F8F',
-    Name = 'Rosy Brown'
-}, {
-    Hex = '#4169E1',
-    Name = 'Royal Blue'
-}, {
-    Hex = '#8B4513',
-    Name = 'Saddle Brown'
-}, {
-    Hex = '#FA8072',
-    Name = 'Salmon'
-}, {
-    Hex = '#F4A460',
-    Name = 'Sandy Brown'
-}, {
-    Hex = '#2E8B57',
-    Name = 'Sea Green'
-}, {
-    Hex = '#FFF5EE',
-    Name = 'Sea Shell'
-}, {
-    Hex = '#A0522D',
-    Name = 'Sienna'
-}, {
-    Hex = '#C0C0C0',
-    Name = 'Silver'
-}, {
-    Hex = '#87CEEB',
-    Name = 'Sky Blue'
-}, {
-    Hex = '#6A5ACD',
-    Name = 'Slate Blue'
-}, {
-    Hex = '#708090',
-    Name = 'Slate Gray'
-}, {
-    Hex = '#FFFAFA',
-    Name = 'Snow'
-}, {
-    Hex = '#00FF7F',
-    Name = 'Spring Green'
-}, {
-    Hex = '#4682B4',
-    Name = 'Steel Blue'
-}, {
-    Hex = '#D2B48C',
-    Name = 'Tan'
-}, {
-    Hex = '#008080',
-    Name = 'Teal'
-}, {
-    Hex = '#D8BFD8',
-    Name = 'Thistle'
-}, {
-    Hex = '#FF6347',
-    Name = 'Tomato'
-}, {
-    Hex = '#40E0D0',
-    Name = 'Turquoise'
-}, {
-    Hex = '#EE82EE',
-    Name = 'Violet'
-}, {
-    Hex = '#F5DEB3',
-    Name = 'Wheat'
-}, {
-    Hex = '#FFFFFF',
-    Name = 'White'
-}, {
-    Hex = '#F5F5F5',
-    Name = 'White Smoke'
-}, {
-    Hex = '#FFFF00',
-    Name = 'Yellow'
-}, {
-    Hex = '#9ACD32',
-    Name = 'Yellow Green'
-}}
-local d3 = {}
-for z, R in d5 do
-    table.insert(d3, R.Name)
-end
-table.sort(d3)
-cH:AddDropdown('selectedDyes', {
-    Text = 'Select Desired Dyes',
-    Tooltip = "Event wheel items with these dyes or close to these dyes won't be sold/recycled",
-    Values = d3,
-    AllowNull = true,
-    Default = {'Rainbow', 'Ghoul', 'Ice', 'Faded', 'Black', 'White'},
-    Multi = true
-})
-cH:AddSlider('colorDistanceThreshold', {
-    Text = 'Color Distance Threshold',
-    Tooltip = 'Keep dyes that are close to your desired dyes',
-    Default = 100,
-    Min = 0,
-    Max = 200,
-    Rounding = 0,
-    HideMax = true,
-    Compact = true
-})
-cH:AddToggle('autoSellCosmetics', {
-    Text = 'Auto Sell Cosmetics',
-    Default = false
-})
-Toggles.autoSellCosmetics:OnChanged(function(cU)
-    if cU and Toggles.autoRecycleCosmetics.Value then
-        Toggles.autoRecycleCosmetics:SetValue(false)
-    end
-end)
-cH:AddToggle('autoRecycleCosmetics', {
-    Text = 'Auto Recycle Cosmetics',
-    Default = false
-})
-Toggles.autoRecycleCosmetics:OnChanged(function(cU)
-    if cU and Toggles.autoSellCosmetics.Value then
-        Toggles.autoSellCosmetics:SetValue(false)
-    end
-end)
-function color3ToHex(color)
-    local ci = math.floor(color.R * 255 + 0.5)
-    local d6 = math.floor(color.G * 255 + 0.5)
-    local cg = math.floor(color.B * 255 + 0.5)
-    return string.format("#%02X%02X%02X", ci, d6, cg)
-end
-function hexToRGB(d7)
-    d7 = d7:gsub("#", "")
-    return tonumber("0x" .. d7:sub(1, 2)), tonumber("0x" .. d7:sub(3, 4)), tonumber("0x" .. d7:sub(5, 6))
-end
-function colorDistance(d8, d9)
-    local da, db, dc = hexToRGB(d8)
-    local dd, de, df = hexToRGB(d9)
-    return math.sqrt((dd - da) ^ 2 + (de - db) ^ 2 + (df - dc) ^ 2)
-end
-function desiredColorCheck(dg)
-    local dh;
-    local di;
-    if dg and dg:FindFirstChild('Dye') and dg.Dye.Value then
-        di = color3ToHex(dg.Dye.Value)
-        for dj, dk in d5 do
-            if Options.selectedDyes.Value[dk.Name] then
-                if di == dk.Hex then
-                    dh = true;
-                    print('Did not sell ' .. dg.Name .. ' - ' .. dk.Name)
-                    break
-                elseif not dk.SpecialType then
-                    local ae = colorDistance(di, dk.Hex)
-                    if ae <= Options.colorDistanceThreshold.Value then
-                        dh = true;
-                        print('Did not sell ' .. dg.Name .. ' - Similar to ' .. dk.Name .. ' - Color Distance: ' ..
-                                  math.floor(ae / 0.1) / 10 .. ' - Hex: ' .. di)
-                        break
-                    end
-                end
-            end
-        end
-    end
-    if dh then
-        return true
-    end
-end
-cH:AddButton({
-    Text = 'Sell Selected Cosmetics',
-    Func = function()
-        local cY = {}
-        for z, R in bN:GetChildren() do
-            local dl = d2[R.Name] or d4[R.Name] or 'none'
-            if (Options.selectedCosmetics.Value[dl] or Options.selectedWheelCosmetics.Value[dl]) and
-                not R:FindFirstChild('Locked') and not desiredColorCheck(R) then
-                table.insert(cY, R)
-            end
-        end
-        if #cY > 0 then
-            libNoti('Sold ' .. #cY .. ' Cosmetics')
-            sell(cY)
-        end
-    end,
-    DoubleClick = true
-})
-cH:AddButton({
-    Text = 'Recycle Selected Cosmetics',
-    Func = function()
-        local cY = {}
-        for z, R in bN:GetChildren() do
-            local dl = d2[R.Name] or d4[R.Name] or 'none'
-            if (Options.selectedCosmetics.Value[dl] or Options.selectedWheelCosmetics.Value[dl]) and
-                not R:FindFirstChild('Locked') and not desiredColorCheck(R) then
-                table.insert(cY, R)
-            end
-        end
-        if #cY > 0 then
-            libNoti('Recycled ' .. #cY .. ' Cosmetics')
-            recycle(cY)
-        end
-    end,
-    DoubleClick = true
-})
-if aE then
-    bN.ChildAdded:Connect(function(R)
-        if Toggles.autoSellCosmetics.Value or Toggles.autoRecycleCosmetics.Value then
-            local dl = d4[R.Name]
-            if dl then
-                R:WaitForChild('Dye', 5)
-                if Options.selectedWheelCosmetics.Value[dl] and not R:FindFirstChild('Locked') and
-                    not desiredColorCheck(R) then
-                    if Toggles.autoSellCosmetics.Value then
-                        sell({R})
-                    end
-                    if Toggles.autoRecycleCosmetics.Value then
-                        recycle({R})
-                    end
-                end
-            end
-        end
-    end)
-    bM.ChildAdded:Connect(function(R)
-        if Toggles.autoSellEggs.Value then
-            local dg = bR[R.Name]
-            if dg.Type == 'Egg' then
-                sell({R})
-            end
-        end
-    end)
-end
-cJ:AddInput('wheelCount', {
-    Default = 100,
-    Numeric = true,
-    Finished = true,
-    Text = 'Wheel Spin Count'
-})
-cJ:AddSlider('wheelDelay', {
-    Text = 'Wheel Spin Delay',
-    Tooltip = 'Keep dyes that are close to your desired dyes',
-    Default = 0,
-    Min = 0,
-    Max = 5,
-    Rounding = 1,
-    HideMax = true,
-    Compact = true
-})
-local dm = cJ:AddLabel(Options.wheelCount.Value .. ' spins in ' ..
-                           timeElapsed(math.round((Options.wheelCount.Value - 1) * Options.wheelDelay.Value * 10) / 10))
-Options.wheelCount:OnChanged(function(cU)
-    dm:SetText(cU .. ' spins in ' .. timeElapsed(math.round((cU - 1) * Options.wheelDelay.Value * 10) / 10))
-end)
-Options.wheelDelay:OnChanged(function(cU)
-    dm:SetText(Options.wheelCount.Value .. ' spins in ' ..
-                   timeElapsed(math.round((Options.wheelCount.Value - 1) * cU * 10) / 10))
-end)
-cJ:AddButton({
-    Text = 'Spin wheel with the settings above!',
-    Func = function()
-        local dn, dp = tonumber(Options.wheelCount.Value), Options.wheelDelay.Value;
-        if dn > 0 then
-            libNoti('Spinning the wheel ' .. dn .. ' times in ' .. timeElapsed(math.round((dn - 1) * dp * 10) / 10) ..
-                        ' seconds!', 7)
-            for z = 1, dn do
-                a5.EventSpinner.JoinQueue:FireServer(c)
-                task.wait(dp)
-            end
-        end
-    end,
-    DoubleClick = true
-})
+--==========================
 function PlayerTp(E, ch, dq, dr)
     if alive() then
         aU.CFrame = CFrame.new(E + Vector3.new(ch, dq, dr))
     end
 end
 function SmartPlayerTp(by, ds)
+    -- THÊM DEBUG Ở ĐÂY
+    
     if not alive() then
         return
     end
+    
     noclip()
+    
     aU.Velocity = Vector3.new()
     if aT:FindFirstChild("Collider") then
         aT.Collider.Velocity = Vector3.new()
     end
+    
     if ds then
         aU.CFrame = CFrame.lookAt(by.Position, Vector3.new(ds.Position.x, by.Position.y, ds.Position.z))
     else
         aU.CFrame = by
     end
+    
 end
-cL:AddToggle('NVD', {
-    Text = 'No Visual Damage',
-    Default = true
-})
-cL:AddToggle('disableEffects', {
-    Text = 'Disable Effects',
-    Default = true
-})
-cL:AddToggle('rendering', {
-    Text = 'Disable 3D Rendering',
-    Default = false
-})
-Toggles.rendering:OnChanged(function(ck)
-    cloneref(game:GetService("RunService")):Set3dRenderingEnabled(not ck)
-end)
-cL:AddToggle('autoHide', {
-    Text = 'Hide GUI On Execution',
-    Default = false
-})
-cN:AddButton({
-    Text = 'Upgrade Equipped Items',
-    Func = function()
-        local dt = {b4:GetChildren()[1], b5:GetChildren()[1], b6:GetChildren()[1]}
-        for dj, du in dt do
-            task.spawn(function()
-                if du and du:FindFirstChild('UpgradeLimit') and du.UpgradeLimit.Value ~= 0 then
-                    local dv = b0.Value;
-                    local dw = tick()
-                    while task.wait(0.1) do
-                        if du:FindFirstChild('Upgrade') and du.Upgrade.Value == du.UpgradeLimit.Value then
-                            break
-                        else
-                            b7:FireServer(du)
-                            if b0.Value ~= dv then
-                                dv = b0.Value;
-                                dw = tick()
-                            end
-                            if tick() - dw >= 2 then
-                                break
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-    end,
-    DoubleClick = true
-})
-cN:AddButton({
-    Text = 'Discover Dungeons (!)',
-    Func = function()
-        if alive() and not aC then
-            local dx = workspace.PhysicalDungeonLocations;
-            for z, R in dx:GetChildren() do
-                local dy;
-                a5.Teleport.WaystoneTeleport:FireServer(1)
-                aU:GetPropertyChangedSignal("Position"):Once(function()
-                    aU:GetPropertyChangedSignal("Position"):Once(function()
-                        dy = true
-                    end)
-                    PlayerTp(R.Ring.Position, 0, 7.5, 0)
-                end)
-                repeat
-                    task.wait()
-                until dy;
-                task.wait(1)
-            end
-        end
-    end,
-    DoubleClick = true
-})
-local dz = false;
-if olympus then
-    cN:AddButton({
-        Text = 'Dex Explorer',
-        Func = function()
-            if not dz then
-                dz = true;
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
-            end
-        end,
-        DoubleClick = true
-    })
+function isRangedClass()
+    return cl[b9] and cl[b9].Type == 'Ranged'
 end
-local dA = {{
-    DisplayName = 'Bank',
-    CodeName = 'Bank'
-}, {
-    DisplayName = 'Zero Altar',
-    CodeName = 'Fusion'
-}, {
-    DisplayName = 'Upgrade',
-    CodeName = 'ItemUpgrade'
-}, {
-    DisplayName = 'Dungeon Menu',
-    CodeName = 'MissionSelect'
-}, {
-    DisplayName = 'Inventory',
-    CodeName = 'Inventory'
-}, {
-    DisplayName = 'Recycler',
-    CodeName = 'Recycler'
-}, {
-    DisplayName = 'Admin Item Panel (!)',
-    CodeName = 'AdminItemPanel'
-}}
-function OpenGui(dB)
-    setthreadcontext(2)
-    require(a4.Client.Gui):Get(dB):Open()
-end
-for dj, d6 in ipairs(dA) do
-    cO:AddButton({
-        Text = d6.DisplayName,
-        Func = function()
-            OpenGui(d6.CodeName)
-        end,
-        DoubleClick = false
-    })
-end
-cO:AddInput('marketFilter', {
-    Numeric = false,
-    Finished = true,
-    Text = 'Market Filter'
-})
-cO:AddButton({
-    Text = 'Open All Markets',
-    Func = function()
-        task.spawn(function()
-            setthreadcontext(2)
-            local dC = require(game.ReplicatedStorage.Client.Gui):Get("Shop")
-            local dD = getfenv(dC.Open).BuildShop;
-            pcall(dC.Open, dC, game)
-            for z, R in getupvalue(dD, 1) do
-                R:Destroy()
-            end
-            for z, R in getupvalue(dD, 2) do
-                R:Disconnect()
-            end
-            local dE = {}
-            local dF = {}
-            local dG = a4:WaitForChild("PlayerShops")
-            for z, dH in b:GetPlayers() do
-                local dI = dG:FindFirstChild(dH.Name) and dG[dH.Name]:FindFirstChild("SellShop")
-                if dI and dI:FindFirstChild("Active") and dI.Active.Value then
-                    setupvalue(dD, 1, {})
-                    setupvalue(dD, 2, {})
-                    dD(dH)
-                    for z, R in getupvalue(dD, 1) do
-                        R.Title.Text = R.Title.Text .. " (" .. dH.Name .. ")"
-                        R.Title.Overlay.Text = R.Title.Text;
-                        table.insert(dE, R)
-                    end
-                    for z, R in getupvalue(dD, 2) do
-                        table.insert(dF, R)
-                    end
-                end
-            end
-            if Options.marketFilter.Value and #Options.marketFilter.Value > 0 then
-                for z, R in dE do
-                    if not R.Title.Text:lower():find(Options.marketFilter.Value:lower()) then
-                        R:Destroy()
-                    end
-                end
-            end
-            table.sort(dE, function(dJ, cg)
-                local dK =
-                    dJ:FindFirstChild('Cost') and dJ.Cost:FindFirstChild('Overlay') and #dJ.Cost.Overlay.Text > 0 and
-                        dJ.Cost.Overlay.Text:gsub(",", "") and tonumber(dJ.Cost.Overlay.Text:gsub(",", "")) or 0;
-                local dL =
-                    cg:FindFirstChild('Cost') and cg.Cost:FindFirstChild('Overlay') and #cg.Cost.Overlay.Text > 0 and
-                        cg.Cost.Overlay.Text:gsub(",", "") and tonumber(cg.Cost.Overlay.Text:gsub(",", "")) or 0;
-                return dK > dL
-            end)
-            setupvalue(dD, 1, dE)
-            setupvalue(dD, 2, dF)
-            getupvalue(dC.Init, 1).Title.Text = "All Shops"
-            getupvalue(dC.Init, 1).Title.Overlay.Text = "All Shops"
-        end)
-    end,
-    DoubleClick = false
-})
-local dM = cQ:AddLabel('Gold Gain: ' .. b0.Value - b1)
-local dN = cQ:AddLabel('Gold Rate: N/A')
-local dO = true;
-g = tick()
-local dP;
-local dQ;
-local dR = false;
-local dS = cQ:AddLabel('Total Gold: ' .. formatNumberWithCommas(b0.Value))
-local dT = cQ:AddLabel('Session Time: 0s')
-cQ:AddDivider()
-local dU = ao.CrossSessionTimestamp or tick()
-local dV = cQ:AddLabel('Cross-Session Time: ' .. timeElapsed(tick() - dU))
-local dW =
-    cQ:AddLabel('CS Gold Gain: ' .. formatNumberWithCommas(ao.CrossSessionGold and b2 - ao.CrossSessionGold or 0))
-local dX = ao.CrossSessionGold or b2;
-cQ:AddButton({
-    Text = 'Reset Cross-Session Time',
-    Func = function()
-        dU = tick()
-        ao.CrossSessionTimestamp = dU;
-        save()
-    end,
-    DoubleClick = true
-})
-cQ:AddButton({
-    Text = 'Reset Cross-Session Gold',
-    Func = function()
-        dX = b2;
-        ao.CrossSessionGold = dX;
-        save()
-        dW:SetText('CS Gold Gain: 0')
-    end,
-    DoubleClick = true
-})
-local dY;
-if not ao.CrossSessionTimestamp then
-    ao.CrossSessionTimestamp = dU;
-    dY = true
-end
-if not ao.CrossSessionGold then
-    ao.CrossSessionGold = dX;
-    dY = true
-end
-if dY then
-    save()
-end
-task.spawn(function()
-    while true do
-        if b0.Value ~= b2 then
-            b2 = b0.Value;
-            if not dO then
-                dN:SetText('Gold Rate: ' .. math.floor((b2 - dQ) / (tick() - dP) * 600) / 10 .. '/min')
-            end
-            if dO then
-                dO = false;
-                dR = true;
-                dP = tick()
-                dQ = b2
-            end
-            dM:SetText('Gold Gained: ' .. formatNumberWithCommas(b2 - b1))
-            dS:SetText('Total Gold: ' .. formatNumberWithCommas(b2))
-            dW:SetText('CS Gold Gain: ' .. formatNumberWithCommas(b2 - dX))
-        end
-        task.wait()
-    end
-end)
-task.spawn(function()
-    while true do
-        task.wait(1)
-        dT:SetText('Session Time: ' .. timeElapsed(tick() - g))
-        dV:SetText('Cross-Session Time: ' .. timeElapsed(tick() - dU))
-    end
-end)
-for z = 1, cb do
-    for dZ, d_ in cc do
-        if d_.OrderId == z then
-            cR:AddButton({
-                Text = d_.Name,
-                Func = function()
-                    a5.Teleport.TeleportToHub:FireServer(d_.Id)
-                end,
-                DoubleClick = false
-            })
-        end
+--==========================
+function PlayerTp(E, ch, dq, dr)
+    if alive() then
+        aU.CFrame = CFrame.new(E + Vector3.new(ch, dq, dr))
     end
 end
-for z, R in aA do
-    cS:AddButton({
-        Text = bO[R].NameTag .. ' T' .. z,
-        Func = function()
-            StartRaid(R)
-        end,
-        DoubleClick = false
-    })
-end
-for z, R in aB do
-    cT:AddButton({
-        Text = string.gsub(bO[R].NameTag, '%(NIGHTMARE%) ', '') .. ' ' .. bO[R].DisplayWorldID .. '-' ..
-            bO[R].WorldMissionID,
-        Func = function()
-            StartRaid(R, Toggles.ChallengeMode.Value and 5 or 1)
-        end,
-        DoubleClick = false
-    })
-end
-cT:AddToggle('ChallengeMode', {
-    Text = 'Challenge Mode',
-    Default = true
-})
+--==========================
 local e0 = Vector3.new(0, 500, 0)
 local e1 = Vector3.new()
 local e2;
@@ -4366,251 +3039,66 @@ local e3;
 local e4;
 do
     function isKrakenArm(e5)
-        local mobName = e5:lower()
-        -- Primary check: EVENTBOSSKrakenArm-Arm#1 through EVENTBOSSKrakenArm-Arm#10
-        if mobName:match('eventbosskrakenarm%-arm#[1-9]') or mobName:match('eventbosskrakenarm%-arm#10') then
-            return true
-        end
-        -- Secondary checks for possible variations
-        return mobName:find('krakenarm%-arm#') or mobName:find('kraken%-arm') or mobName:find('krakenarm')
+        return e5:lower():find('kraken-arm') or e5:lower():find('krakenarm')
     end
-    
-    function isPositionInConeIndicator(position)
-        -- Check if position is inside any ConeIndicator or KrakenInkAttack danger zone
-        local success, result = pcall(function()
-            -- Check ConeIndicator
-            for _, cone in pairs(workspace:GetChildren()) do
-                if cone.Name == "ConeIndicator" and cone:IsA("Model") and cone.PrimaryPart then
-                    local distance = (position - cone.PrimaryPart.Position).Magnitude
-                    local radius = math.max(cone.PrimaryPart.Size.X, cone.PrimaryPart.Size.Z) / 2
-                    
-                    if distance <= radius + 8 then -- Increased buffer zone
-                        print("[Debug] Position in ConeIndicator! Distance:", distance, "Radius:", radius)
-                        return true
-                    end
-                elseif cone.Name == "ConeIndicator" and cone:IsA("BasePart") then
-                    local distance = (position - cone.Position).Magnitude
-                    local radius = math.max(cone.Size.X, cone.Size.Z) / 2
-                    
-                    if distance <= radius + 8 then
-                        print("[Debug] Position in ConeIndicator BasePart! Distance:", distance, "Radius:", radius)
-                        return true
-                    end
-                end
-            end
-            
-            -- Check KrakenInkAttack
-            for _, ink in pairs(workspace:GetChildren()) do
-                if ink.Name == "KrakenInkAttack" and ink:IsA("Model") and ink.PrimaryPart then
-                    local distance = (position - ink.PrimaryPart.Position).Magnitude
-                    local radius = math.max(ink.PrimaryPart.Size.X, ink.PrimaryPart.Size.Z) / 2
-                    
-                    if distance <= radius + 10 then -- Larger buffer for ink attack
-                        print("[Debug] Position in KrakenInkAttack! Distance:", distance, "Radius:", radius)
-                        return true
-                    end
-                elseif ink.Name == "KrakenInkAttack" and ink:IsA("BasePart") then
-                    local distance = (position - ink.Position).Magnitude
-                    local radius = math.max(ink.Size.X, ink.Size.Z) / 2
-                    
-                    if distance <= radius + 10 then
-                        print("[Debug] Position in KrakenInkAttack BasePart! Distance:", distance, "Radius:", radius)
-                        return true
-                    end
-                end
-            end
-            
-            return false
-        end)
-        
-        return success and result or false
-    end
-    
-    function findSafeKrakenArm()
-        -- Find a Kraken Arm with safe back position (15 studs behind)
-        if not bl then return nil end
-        
-        local success, result = pcall(function()
-            for i = 1, 10 do
-                local armName = "EVENTBOSSKrakenArm-Arm#" .. i
-                local krakenArm = bl:FindFirstChild(armName)
-                
-                if krakenArm and isAlive(krakenArm) then
-                    local armPosition = krakenArm.PrimaryPart.Position
-                    
-                    -- Check if the back position (where player will stand) is safe
-                    local backPosition = getKrakenArmBackPosition(krakenArm, 15)
-                    
-                    if backPosition and not isPositionInConeIndicator(backPosition) then
-                        print("[Debug] Found safe Kraken Arm with safe back position:", armName)
-                        return krakenArm
-                    else
-                        print("[Debug] Kraken Arm back position unsafe:", armName)
-                    end
-                end
-            end
-            print("[Debug] No Kraken Arms with safe back positions found")
-            return nil
-        end)
-        
-        return success and result or nil
-    end
-    
-    function getSafePositionNearTarget(targetPosition)
-        -- Find a safe position near target that's not in any ConeIndicator or KrakenInkAttack
-        local success, result = pcall(function()
-            local testPositions = {
-                targetPosition + Vector3.new(15, 0, 0),   -- East (increased distance)
-                targetPosition + Vector3.new(-15, 0, 0),  -- West  
-                targetPosition + Vector3.new(0, 0, 15),   -- North
-                targetPosition + Vector3.new(0, 0, -15),  -- South
-                targetPosition + Vector3.new(12, 0, 12),  -- NE
-                targetPosition + Vector3.new(-12, 0, 12), -- NW
-                targetPosition + Vector3.new(12, 0, -12), -- SE
-                targetPosition + Vector3.new(-12, 0, -12),-- SW
-                targetPosition + Vector3.new(20, 0, 0),   -- Far East
-                targetPosition + Vector3.new(-20, 0, 0),  -- Far West
-                targetPosition + Vector3.new(0, 0, 20),   -- Far North
-                targetPosition + Vector3.new(0, 0, -20),  -- Far South
-                targetPosition + Vector3.new(0, 25, 0),   -- High above
-                targetPosition + Vector3.new(10, 20, 10), -- High NE
-                targetPosition + Vector3.new(-10, 20, 10),-- High NW
-            }
-            
-            for _, testPos in pairs(testPositions) do
-                if not isPositionInConeIndicator(testPos) then
-                    print("[Debug] Found safe position near target at:", testPos)
-                    return testPos
-                else
-                    print("[Debug] Test position unsafe:", testPos)
-                end
-            end
-            
-            -- If no safe position found, go very high above
-            print("[Debug] No safe position found, going very high above")
-            return targetPosition + Vector3.new(0, 50, 0)
-        end)
-        
-        return success and result or (targetPosition + Vector3.new(0, 50, 0))
-    end
-    
-    -- Function to get position behind Kraken Arm
-    function getKrakenArmBackPosition(krakenArm, distance)
-        distance = distance or 15 -- Default 15 studs behind
-        
-        -- Safety check
-        if not krakenArm then
-            print("[Warning] Kraken Arm is nil")
-            return nil
-        end
-        
-        if not krakenArm:FindFirstChild("HumanoidRootPart") then
-            print("[Warning] Kraken Arm missing HumanoidRootPart:", krakenArm.Name)
-            return nil
-        end
-        
-        local success, result = pcall(function()
-            local armRootPart = krakenArm.HumanoidRootPart
-            local armPosition = armRootPart.Position
-            local armCFrame = armRootPart.CFrame
-            
-            -- Get the direction the arm is facing
-            local armLookVector = armCFrame.LookVector
-            
-            -- Position behind the arm (opposite to its facing direction)
-            local backPosition = armPosition - (armLookVector * distance)
-            
-            -- Add height to avoid ground collision and get better attack angle
-            backPosition = backPosition + Vector3.new(0, 12, 0)
-            
-            print("[Debug] Kraken Arm " .. krakenArm.Name .. " back position (15 studs):", backPosition)
-            return backPosition
-        end)
-        
-        if success then
-            return result
-        else
-            print("[Error] Failed to calculate back position for:", krakenArm.Name)
-            return nil
-        end
-    end
-    
     function MobTeleport()
-        task.spawn(function()
-            local e6;
-            local e7;
-            local e8;
-            while Toggles.Autofarm.Value do
-                for z, R in bl:GetChildren() do
-                    if isAlive(R) then
-                        if mobWaitTbl and table.find(mobWaitTbl, R.Name) and (not e8 or alwaysWait) then
-                            task.wait(waittime)
-                            e8 = true
-                        end
-                        local ab = R.PrimaryPart;
-                        if not firstMobFound then
-                            firstMobFound = true
-                        end
-                        while isAlive(R) and Toggles.Autofarm.Value and a8 do
-                            bY = R;
-                            e6 = ab.Position;
-                            setCamera(not bX and Toggles.mobCamera.Value and bw, ab.Position)
-                            
-                            -- For Kraken Arms, position behind them at 15 studs distance
-                            local targetPosition
-                            if isKrakenArm(R.Name) then
-                                print("[Debug] Processing Kraken Arm:", R.Name)
-                                targetPosition = getKrakenArmBackPosition(R, 15)
-                                if not targetPosition then
-                                    -- Fallback to default position if calculation fails
-                                    print("[Debug] Using fallback position for:", R.Name)
-                                    local fallbackOffset = 30
-                                    targetPosition = ab.Position + Vector3.new(0, fallbackOffset, 0) + (bX and e0 or e1)
-                                end
-                                print("[Debug] Final target position for " .. R.Name .. ":", targetPosition)
-                            else
-                                -- Normal mob positioning
-                                local normalOffset = (ab.Size.Y / 2 + Options.Offset.Value) * (isRangedClass() and 1 or -1)
-                                targetPosition = ab.Position + (table.find(aS, R) and e1 or Vector3.new(0, normalOffset, 0) + (bX and e0 or e1))
-                                print("[Debug] Normal mob position for " .. R.Name .. ":", targetPosition)
-                            end
-                            
-                            -- Check if position would be in danger zone
-                            local finalTargetPosition = targetPosition
-                            pcall(function()
-                                if isPositionInConeIndicator(targetPosition) then
-                                    print("[Warning] Target position would be in danger zone for " .. R.Name .. ", finding safe position...")
-                                    local safePos = getSafePositionNearTarget(ab.Position)
-                                    if safePos and not isPositionInConeIndicator(safePos) then
-                                        finalTargetPosition = safePos
-                                        print("[Debug] Using safe position:", safePos)
-                                    else
-                                        print("[Error] Safe position still dangerous! Going very high...")
-                                        finalTargetPosition = ab.Position + Vector3.new(0, 70, 0)
-                                    end
-                                end
-                            end)
-                            
-                            local e3 = CFrame.new(finalTargetPosition) + ab.CFrame.lookVector * 2;
-                            e7 = e3;
-                            SmartPlayerTp(e3, ab)
-                            b_:Wait()
-                        end
+    
+    task.spawn(function()
+        local e6;
+        local e7;
+        local e8;
+        local loopCount = 0
+        
+        while Toggles.Autofarm.Value do
+            loopCount = loopCount + 1
+            
+            for z, R in bl:GetChildren() do
+                if isAlive(R) then
+
+                    
+                    if mobWaitTbl and table.find(mobWaitTbl, R.Name) and (not e8 or alwaysWait) then
+                        task.wait(waittime)
+                        e8 = true
+                    end
+                    local ab = R.PrimaryPart;
+                    if not firstMobFound then
+                        firstMobFound = true
+                    end
+                    while isAlive(R) and Toggles.Autofarm.Value and a8 do
+                    
+                        bY = R;
+                        e6 = ab.Position;
+                        setCamera(not bX and Toggles.mobCamera.Value and bw, ab.Position)
+                        e2 = isKrakenArm(R.Name) and 0 or (ab.Size.Y / 2 + Options.Offset.Value) *
+                                 (isRangedClass() and 1 or -1)
+                        e3 = CFrame.new(ab.Position +
+                                            (table.find(aS, R) and e1 or Vector3.new(0, e2, 0) + (bX and e0 or e1))) +
+                                 ab.CFrame.lookVector * 2;
+                        e7 = e3;
+                        
+                       
+                        SmartPlayerTp(e3, ab)
+                        
+                        
+                        b_:Wait()
                     end
                 end
-                bY = nil;
-                setCamera()
-                unnoclip()
-                if aI and a8 and e7 then
-                    SmartPlayerTp(e7)
-                end
-                task.wait()
             end
-            if e6 and aI then
-                SmartPlayerTp(CFrame.new(e6 + Vector3.new(0, 10, 0)))
+            bY = nil;
+            setCamera()
+            unnoclip()
+            if aI and a8 and e7 then
+                SmartPlayerTp(e7)
             end
-        end)
-    end
+            task.wait()
+        end
+        
+        
+        if e6 and aI then
+            SmartPlayerTp(CFrame.new(e6 + Vector3.new(0, 10, 0)))
+        end
+    end)
+end
     function MobTeleportIgnore(e9, mobWaitTbl, waittime, alwaysWait)
         local e8;
         task.spawn(function()
@@ -4627,7 +3115,7 @@ do
                                 (R.Name ~= e9 or R.Name == e9 and bd == 1) do
                                 bY = R;
                                 setCamera(not bX and Toggles.mobCamera.Value and bw, ab.Position)
-                                e2 = isKrakenArm(R.Name) and 30 or (ab.Size.Y / 2 + Options.Offset.Value) *
+                                e2 = isKrakenArm(R.Name) and 0 or (ab.Size.Y / 2 + Options.Offset.Value) *
                                          (isRangedClass() and 1 or -1)
                                 e3 = CFrame.new(ab.Position +
                                                     (table.find(aS, R) and e1 or Vector3.new(0, e2, 0) +
@@ -4653,32 +3141,112 @@ do
                 local ee = {}
                 for z, R in bl:GetChildren() do
                     if isAlive(R) then
-                        -- Special handling for Kraken Arms - only add if not in cone indicator danger zone
-                        if isKrakenArm(R.Name) then
-                            pcall(function()
-                                local armPosition = R.PrimaryPart.Position
-                                if not isPositionInConeIndicator(armPosition) then
-                                    table.insert(ee, R)
-                                    print("[Debug] Added safe Kraken Arm:", R.Name)
-                                else
-                                    print("[Debug] Skipped Kraken Arm in danger zone:", R.Name)
-                                end
-                            end)
-                        else
-                            table.insert(ee, R)
-                        end
+                        table.insert(ee, R)
                     end
                 end
                 
-                -- If no available mobs found, try to find any safe Kraken Arm
-                if #ee == 0 then
-                    pcall(function()
-                        local safeArm = findSafeKrakenArm()
-                        if safeArm then
-                            table.insert(ee, safeArm)
-                            print("[Debug] Found fallback safe Kraken Arm:", safeArm.Name)
+                -- ✅ THÊM: Check fountain cho Fallen King
+                -- ✅ THÊM: Check fountain cho Fallen King
+                if ay == 22 then
+                    local fountain = workspace:FindFirstChild('CureFountainFallenKing')
+                    
+                    -- Kiểm tra còn minion không
+                    local hasMinion = false
+                    for _, mob in pairs(ee) do
+                        if mob.Name == 'FallenKingMinion' then
+                            hasMinion = true
+                            break
                         end
-                    end)
+                    end
+                    
+                    -- Kiểm tra GUI text để xem có bị cursed không
+                    local playerGui = game:GetService("Players").LocalPlayer.PlayerGui
+                    local missionGui = playerGui:FindFirstChild("MissionObjective")
+                    local needsCure = false
+                    
+                    if missionGui then
+                        local missionLabel = missionGui:FindFirstChild("MissionObjective")
+                        if missionLabel then
+                            local label = missionLabel:FindFirstChild("Label")
+                            if label and label.Text then
+                                local text = label.Text
+                                -- Nếu có text "The Cure Well has been found!" = đang bị cursed
+                                if text:find("The Cure Well has been found!") then
+                                    needsCure = true
+                                end
+                            end
+                        end
+                    end
+                    
+                    -- Nếu có fountain + không còn minion + đang bị cursed → đi cure
+                    if fountain and not hasMinion and needsCure and alive() then
+                        print("🔮 Phát hiện cursed! Đang đến fountain...")
+                        
+                        -- ✅ TẮT MobTeleport (KHÔNG XÓA eb/ec)
+                        local wasA8 = a8
+                        a8 = false
+                        
+                        -- ✅ Tìm Ball bên trong fountain
+                        local ball = fountain:FindFirstChild("Ball")
+                        local targetPart = ball or fountain:FindFirstChild("ArcanePanel") or fountain.PrimaryPart
+                        
+                        if not targetPart then
+                            print("❌ Không tìm thấy Ball hoặc ArcanePanel trong fountain")
+                            a8 = wasA8
+                            task.wait()
+                            continue
+                        end
+                        
+                        print("📍 Teleport đến:", targetPart.Name, "| Position:", targetPart.Position)
+                        
+                        local cureStart = tick()
+                        local cured = false
+                        
+                        -- ✅ Cure loop
+                        while tick() - cureStart < 15 and alive() and not cured do
+                            local targetPos = targetPart.Position
+                            local targetCFrame = CFrame.new(targetPos + Vector3.new(0, 2, 0))
+                            
+                            -- Teleport nhiều lần
+                            for i = 1, 3 do
+                                aT:SetPrimaryPartCFrame(targetCFrame)
+                                task.wait(0.05)
+                            end
+                            
+                            local actualDistance = (aU.Position - targetPos).magnitude
+                            task.wait(0.2)
+                            
+                            if missionGui then
+                                local missionLabel = missionGui:FindFirstChild("MissionObjective")
+                                if missionLabel then
+                                    local label = missionLabel:FindFirstChild("Label")
+                                    if label and label.Text then
+                                        local text = label.Text
+                                        
+                                        if not text:find("The Cure Well has been found!") then
+                                            print("✅ Cure thành công! Text: '" .. text .. "'")
+                                            cured = true
+                                            break
+                                        else
+                                            local countMatch = text:match("%((%d+)%)")
+                                            print("⏳ Đang cure... Count:", (countMatch or "N/A"), "| Distance:", math.floor(actualDistance))
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        
+                        -- ✅ BẬT LẠI a8
+                        a8 = wasA8
+                        
+                        if not cured then
+                            print("⚠️ Timeout 15s - tiếp tục farm")
+                        else
+                            print("🎯 Đã cure xong, đang quay lại farm boss...")
+                        end
+                        
+                        -- ✅ KHÔNG dùng continue - để code chạy xuống phần chọn target
+                    end
                 end
                 
                 for z = 1, #ea do
@@ -4703,74 +3271,28 @@ do
             local e8;
             while Toggles.Autofarm.Value do
                 if isAlive(eb) and a8 then
-                    local shouldAttack = true
-                    local safePosition = nil
                     local ef = eb.PrimaryPart;
+                    bY = eb;
+                    if mobWaitTbl and table.find(mobWaitTbl, ec) and (not e8 or alwaysWait) then
+                        task.wait(waittime)
+                        e8 = true
+                    end
+                    setCamera(not bX and Toggles.mobCamera.Value and bw, ef.Position)
                     
-                    -- Calculate position behind Kraken Arms or normal position for other mobs
-                    local normalPosition
-                    if isKrakenArm(ec) then
-                        normalPosition = getKrakenArmBackPosition(eb, 15)
-                        if not normalPosition then
-                            -- Fallback to default position if calculation fails
-                            normalPosition = ef.Position + Vector3.new(0, 30, 0) + (bX and e0 or e1)
-                        end
+                    -- ✅ THÊM: Logic đặc biệt cho BOSSFallenKing
+                    if ec == "BOSSFallenKing" or ec == "BOSSFallenQueen" then
+                        -- Y = 0 (ngang boss), X offset 75 studs
+                        e2 = 0  -- Y position = 0 (same as boss)
+                        e3 = CFrame.new(ef.Position + Vector3.new(0, 0, 106))  -- Z offset 75 (phía sau)
                     else
-                        normalPosition = ef.Position + (table.find(aS, eb) and e1 or Vector3.new(0, (ef.Size.Y / 2 + Options.Offset.Value) * (isRangedClass() and 1 or -1), 0) + (bX and e0 or e1))
+                        -- Logic cũ cho các mob khác
+                        e2 = isKrakenArm(ec) and 0 or (ef.Size.Y / 2 + Options.Offset.Value) * (isRangedClass() and 1 or -1)
+                        e3 = CFrame.new(ef.Position +
+                                            (table.find(aS, eb) and e1 or Vector3.new(0, e2, 0) + (bX and e0 or e1))) +
+                                ef.CFrame.lookVector * 2;
                     end
                     
-                    pcall(function()
-                        if isPositionInConeIndicator(normalPosition) then
-                            print("[Warning] Normal position would be in danger zone for " .. ec .. ", finding safe position...")
-                            safePosition = getSafePositionNearTarget(ef.Position)
-                            
-                            -- Also check if the safe position is actually safe
-                            if isPositionInConeIndicator(safePosition) then
-                                print("[Error] Even safe position is in danger! Going very high...")
-                                safePosition = ef.Position + Vector3.new(0, 60, 0)
-                            end
-                            
-                            pcall(function()
-                                libNoti("Danger zone detected, using safe position")
-                            end)
-                        end
-                        
-                        -- Double check for Kraken Arms - if current arm itself is in danger zone
-                        if isKrakenArm(ec) then
-                            local armPosition = ef.Position
-                            if isPositionInConeIndicator(armPosition) then
-                                print("[Info] Current Kraken Arm " .. ec .. " itself is in danger zone, finding alternative...")
-                                local safeArm = findSafeKrakenArm()
-                                if safeArm then
-                                    eb, ec = safeArm, safeArm.Name
-                                    ef = eb.PrimaryPart
-                                    print("[Success] Switched to safe Kraken Arm: " .. ec)
-                                    pcall(function()
-                                        libNoti("Switched to safe Kraken Arm: " .. ec)
-                                    end)
-                                    -- Recalculate position for new arm
-                                    normalPosition = ef.Position + (table.find(aS, eb) and e1 or Vector3.new(0, 30, 0) + (bX and e0 or e1))
-                                    safePosition = nil -- Reset safe position
-                                end
-                            end
-                        end
-                    end)
-                    
-                    -- Only proceed with attack if we have a valid target
-                    if shouldAttack and isAlive(eb) then
-                        bY = eb;
-                        if mobWaitTbl and table.find(mobWaitTbl, ec) and (not e8 or alwaysWait) then
-                            task.wait(waittime)
-                            e8 = true
-                        end
-                        setCamera(not bX and Toggles.mobCamera.Value and bw, ef.Position)
-                        
-                        -- Use safe position if available, otherwise use normal calculation
-                        local targetPosition = safePosition or normalPosition
-                        local e3 = CFrame.new(targetPosition) + ef.CFrame.lookVector * 2;
-                        
-                        SmartPlayerTp(e3, ef)
-                    end
+                    SmartPlayerTp(e3, ef)
                 else
                     bY = nil;
                     setCamera()
@@ -5239,6 +3761,7 @@ if aC then
         end)
         bM.ChildAdded:Connect(function(ck)
             local eY = bR[ck.Name]
+            if not eY then return end
             local eZ = c0:GetItemTier(ck)
             local e_;
             if eY.Type == 'Weapon' or eY.Type == 'Armor' then
@@ -5331,6 +3854,7 @@ if aC then
         end)
         bN.ChildAdded:Connect(function(ck)
             local eY = bR[ck.Name]
+            if not eY then return end
             if Options.selectedCosmetics.Value[eY.DisplayKey] and Toggles.Autofarm.Value then
                 sell({ck})
                 libNoti(eY.DisplayKey .. ' sold!')
@@ -5398,6 +3922,7 @@ if aH or aI or aJ then
     end)
     bM.ChildAdded:Connect(function(ck)
         local eY = bR[ck.Name]
+        if not eY then return end
         local eZ = c0:GetItemTier(ck)
         local e_;
         if eY.Type == 'Weapon' or eY.Type == 'Armor' then
@@ -5490,6 +4015,7 @@ if aH or aI or aJ then
     end)
     bN.ChildAdded:Connect(function(ck)
         local eY = bR[ck.Name]
+        if not eY then return end
         if Options.selectedCosmetics.Value[eY.DisplayKey] and Toggles.Autofarm.Value then
             sell({ck})
             libNoti(eY.DisplayKey .. ' sold!')
@@ -5516,7 +4042,637 @@ if aI then
 end
 local fl = require(a4.Client.Gui.GuiScripts.LootReceived)
 local fm = fl.AddItemToQueue;
-Toggles.Autofarm:OnChanged(function(fn)
+task.spawn(function()
+    workspace:WaitForChild("Mobs").ChildAdded:Connect(function(bA)
+        bA:WaitForChild("HealthProperties"):WaitForChild("Health").Changed:Connect(function(cU)
+            if cU == 0 then
+                game:GetService("Debris"):AddItem(bA, 0.2)
+            end
+        end)
+    end)
+    if workspace:FindFirstChild('Assets_FX') then
+        for z, R in workspace.Assets_FX:GetChildren() do
+            R:Destroy()
+        end
+        workspace.Assets_FX.ChildAdded:Connect(function(ck)
+            ck:Destroy()
+        end)
+    end
+    local cj = require(game.ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Effects"))
+    local fM = cj.DoEffect;
+    cj.DoEffect = function(self, ...)
+        if Toggles.disableEffects.Value then
+            return
+        end
+        local fN = {...}
+        if ay and ay == 27 and fN[1] == "RadialIndicator" and Toggles.Autofarm.Value then
+            fN[5] = fN[5] + 1;
+            return fM(self, unpack(fN))
+        end
+        return fM(self, ...)
+    end
+end)
+-- ============== NO DAMAGE NUMBERS HOOK ==============
+local cj = require(game.ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Effects"))
+local gH = cj.RenderDamageNumber
+
+-- Hook RenderDamageNumber để ẩn số sát thương
+cj.RenderDamageNumber = function(...)
+    if Toggles.NVD.Value then
+        return
+    end
+    return gH(...)
+end
+-- ============== FAST SPRINT HOOK ============== (← THÊM PHẦN NÀY)
+task.spawn(function()
+    while true do
+        pcall(function()
+            if bU and bU.SPRINT_WALKSPEED then
+                bU.SPRINT_WALKSPEED = Options.FastSprint.Value
+            end
+        end)
+        task.wait(0.5)
+    end
+end)
+local fO = {}
+local fP = {}
+local fQ = {}
+local fR = game:GetService("ReplicatedStorage").Shared.Mobs.Mobs;
+for z, R in fR:GetDescendants() do
+    if R:IsA('RemoteEvent') then
+        local fS = true;
+        if R.Parent and table.find(fO, R.Parent.Name) then
+            fS = false
+        end
+        for dZ, F in fP do
+            if table.find(F, R.Name) and R.Parent and R.Parent.Name == dZ then
+                fS = false
+            end
+        end
+        if fS and table.find(fQ, R.Name) then
+            fS = false
+        end
+        if fS then
+            R:Destroy()
+        end
+    end
+end
+do
+    function getBoundingBox(bx)
+        local fT = bx.Size;
+        local fU = bx.Position - fT / 2;
+        local fV = bx.Position + fT / 2;
+        return fU, fV
+    end
+    function getClosestPointOnAABB(fW, fU, fV)
+        local fX = Vector3.new(math.clamp(fW.X, fU.X, fV.X), math.clamp(fW.Y, fU.Y, fV.Y), math.clamp(fW.Z, fU.Z, fV.Z))
+        return fX
+    end
+    function getClosestPointAndDistance(fY, fZ)
+        if not fY or not fZ then
+            return math.huge, nil
+        end
+        local f_ = fY.Position;
+        local fU, fV = getBoundingBox(fZ)
+        local fX = getClosestPointOnAABB(f_, fU, fV)
+        local g0 = (fZ.Position - fX).Unit;
+        fX = fX + g0 * 0.1;
+        if Toggles.Autofarm.Value and isRangedClass() then
+            local g1 = olympus and Options['testOffset'] and Options.testOffset.Value or aR[fZ.Parent.Name] or 0;
+            fX = fX + Vector3.new(0, g1, 0)
+        end
+        local g2 = (fX - f_).Magnitude;
+        return g2, fX
+    end
+    function getClosestMob(g3)
+        local g4 = math.huge;
+        local g5, fX, g6, ad, ag;
+        local ey, g7, ec;
+        if g3 and isAlive(g3) then
+            local g8 = g3.PrimaryPart;
+            local g2, g9 = getClosestPointAndDistance(aU, g8)
+            g4, fX, g5 = g2, g9, g8
+        else
+            for dj, bA in bl:GetChildren() do
+                if isAlive(bA) and not ignoreIfNotAlone(bA.Name) then
+                    local g8 = bA.PrimaryPart;
+                    local g2, g9 = getClosestPointAndDistance(aU, g8)
+                    if g2 < g4 then
+                        g4, fX, g5 = g2, g9, g8
+                    end
+                end
+            end
+        end
+        if g5 then
+            ey, g7, ec = Mob(g5.Parent.Name), g5.Parent.HealthProperties.Health, g5.Parent.Name;
+            ad = g5.Position;
+            g6 = (aU.Position - ad).magnitude;
+            ag = ey and ey['BossTag']
+        end
+        return g5, fX, ad, g4, g6, ag, g7
+    end
+    function equipWepWithId(ga, e5)
+        for z, R in bM:GetChildren() do
+            if R:FindFirstChild('ID') and R.ID.Value and R.ID.Value == ga then
+                bT:FireServer(R, b4)
+                libNoti('Equipped ' .. bR[R.Name].DisplayKey .. ' for' .. e5)
+                break
+            end
+        end
+    end
+end
+local gb = {'CorruptedGreaterTree'}
+function ignoreIfNotAlone(ec)
+    if bd and bd > 1 and table.find(gb, ec) then
+        return true
+    end
+end
+pcall(function()
+    aa = game:GetService("MarketplaceService"):UserOwnsGamePassAsync(d, 8136250)
+end)
+--=================Gui Library==================
+
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+WindUI:SetNotificationLower(true)
+
+WindUI:AddTheme({
+    Name = "My Theme", -- theme name
+    
+    Accent = WindUI:Gradient({                                                  
+        ["0"] = { Color = Color3.fromHex("#1f1f23"), Transparency = 0 },        
+        ["100"]   = { Color = Color3.fromHex("#18181b"), Transparency = 0 },    
+    }, {                                                                        
+        Rotation = 0,                                                           
+    }),                                                                         
+    Dialog = Color3.fromHex("#161616"),
+    Outline = Color3.fromHex("#FFFFFF"),
+    Text = Color3.fromHex("#FFFFFF"),
+    Placeholder = Color3.fromHex("#7a7a7a"),
+    Background = Color3.fromHex("#101010"),
+    Button = Color3.fromHex("#52525b"),
+    Icon = Color3.fromHex("#a1a1aa")
+})
+WindUI:SetTheme("My Theme")
+local Window = WindUI:CreateWindow({
+    Title = "🌸Anya Hub🌸",
+    Icon = "door-open", -- lucide icon
+    Author = "by Maxi",
+    Folder = "MySuperHub",
+    
+    -- ↓ This all is Optional. You can remove it.
+    Size = UDim2.fromOffset(580, 460),
+    MinSize = Vector2.new(560, 350),
+    MaxSize = Vector2.new(850, 560),
+    Transparent = true,
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 200,
+    BackgroundImageTransparency = 0.42,
+    HideSearchBar = true,
+    ScrollBarEnabled = false,
+    
+    -- ↓ Optional. You can remove it.
+    --[[ You can set 'rbxassetid://' or video to Background.
+        'rbxassetid://':
+            Background = "rbxassetid://", -- rbxassetid
+        Video:
+            Background = "video:YOUR-RAW-LINK-TO-VIDEO.webm", -- video 
+    --]]
+    
+    -- ↓ Optional. You can remove it.
+    User = {
+        Enabled = true,
+        Anonymous = false,  -- ✅ Đổi thành false để hiển thị avatar thật
+        Name = c.Name,      -- ✅ Tên username
+        DisplayName = c.DisplayName,  -- ✅ Tên hiển thị
+        Callback = function()
+            print("User button clicked")
+        end,
+    },
+    
+    --       remove this all, 
+    -- !  ↓  if you DON'T need the key system
+    KeySystem = { 
+        -- ↓ Optional. You can remove it.
+        Key = { "1234", "5678" },
+        
+        Note = "Example Key System.",
+        
+        -- ↓ Optional. You can remove it.
+        Thumbnail = {
+            Image = "rbxassetid://",
+            Title = "Thumbnail",
+        },
+        
+        -- ↓ Optional. You can remove it.
+        URL = "YOUR LINK TO GET KEY (Discord, Linkvertise, Pastebin, etc.)",
+        
+        -- ↓ Optional. You can remove it.
+        SaveKey = true, -- automatically save and load the key.
+        
+        -- ↓ Optional. You can remove it.
+        -- API = {} ← Services. Read about it below ↓
+    },
+})
+Window:SetBackgroundImage("rbxassetid://id-here")
+Window:SetBackgroundImageTransparency(0.5) -- from 0  to 1
+Window:SetToggleKey(Enum.KeyCode.H)
+Window:ToggleTransparency(true)
+Window:IsResizable(true)
+Window:EditOpenButton({
+    Title = "Open Example UI",
+    Icon = "monitor",
+    CornerRadius = UDim.new(0,16),
+    StrokeThickness = 2,
+    Color = ColorSequence.new( -- gradient
+        Color3.fromHex("FF0F7B"), 
+        Color3.fromHex("F89B29")
+    ),
+    OnlyMobile = false,
+    Enabled = true,
+    Draggable = true,
+})
+-- ============== HÀM UTILITY ==============
+-- Hàm libNoti để hiển thị thông báo
+function libNoti(msg, duration)
+    print(msg)
+    WindUI:Notify({
+        Title = "Anya Hub",
+        Content = msg,
+        Duration = duration or 3
+    })
+end
+
+-- Hàm set mission objective
+function setMissionObjective(text, color)
+    local success = pcall(function()
+        local label = c.PlayerGui.MissionObjective.MissionObjective.Label
+        label.Text = text
+        label.Overlay.Text = text
+        if color then
+            label.TextColor3 = color
+            label.Overlay.TextColor3 = color
+        end
+    end)
+end
+
+-- Hàm reset mission objective
+function resetMissionObjective()
+    setMissionObjective('')
+end
+
+-- Hàm pcall với error handling
+function pcallWithError(func)
+    local success, err = pcall(func)
+    if not success then
+        warn("Error:", err)
+    end
+    return success, err
+end
+
+-- ============== KẾT THÚC HÀM UTILITY ==============
+-- ============== CONFIG SYSTEM ==============
+local ConfigSystem = {}
+ConfigSystem.ConfigFolder = "AnyaHub_Configs"
+ConfigSystem.selectedConfig = ""
+ConfigSystem.dropdownRef = nil
+ConfigSystem.UIElements = {} -- LƯU REFERENCES ĐẾN TẤT CẢ UI ELEMENTS
+
+function ConfigSystem.deepCopy(original)
+    if type(original) ~= 'table' then return original end
+    local copy = {}
+    for k, v in pairs(original) do copy[ConfigSystem.deepCopy(k)] = ConfigSystem.deepCopy(v) end
+    return copy
+end
+
+function ConfigSystem.serializeTable(tbl)
+    return game:GetService("HttpService"):JSONEncode(tbl)
+end
+
+function ConfigSystem.deserializeTable(str)
+    local success, result = pcall(function()
+        return game:GetService("HttpService"):JSONDecode(str)
+    end)
+    return success and result or nil
+end
+
+function ConfigSystem.getConfigData()
+    local data = {Toggles = {}, Options = {}}
+    for key, toggle in pairs(Toggles) do
+        if toggle and toggle.Value ~= nil then data.Toggles[key] = toggle.Value end
+    end
+    for key, option in pairs(Options) do
+        if option and option.Value ~= nil then
+            local value = option.Value
+            if type(value) == "string" then value = tonumber(value) or value end
+            data.Options[key] = type(value) == "table" and ConfigSystem.deepCopy(value) or value
+        end
+    end
+    return data
+end
+
+function ConfigSystem.loadConfigData(data)
+    if not data then return end
+    
+    -- Load Toggles
+    if data.Toggles then
+        for key, value in pairs(data.Toggles) do
+            if Toggles[key] and type(value) == "boolean" then
+                pcall(function()
+                    -- Cập nhật wrapper
+                    Toggles[key]:SetValue(value)
+                    
+                    -- Cập nhật UI element
+                    if ConfigSystem.UIElements[key] then
+                        ConfigSystem.UIElements[key]:Set(value)
+                    end
+                end)
+            end
+        end
+    end
+    
+    -- Load Options
+    if data.Options then
+        for key, value in pairs(data.Options) do
+            if Options[key] then
+                pcall(function()
+                    -- Cập nhật wrapper
+                    if type(value) == "table" then
+                        Options[key]:SetValue(ConfigSystem.deepCopy(value))
+                    else
+                        Options[key]:SetValue(value)
+                    end
+                    
+                    -- Cập nhật UI element
+                    if ConfigSystem.UIElements[key] then
+                        if type(value) == "table" then
+                            ConfigSystem.UIElements[key]:Set(ConfigSystem.deepCopy(value))
+                        else
+                            ConfigSystem.UIElements[key]:Set(value)
+                        end
+                    end
+                end)
+            end
+        end
+    end
+end
+
+function ConfigSystem.getConfigList()
+    local configs = {}
+    if isfolder(ConfigSystem.ConfigFolder) then
+        for _, file in pairs(listfiles(ConfigSystem.ConfigFolder)) do
+            local fileName = file:match("([^/\\]+)%.txt$")
+            -- ✅ Loại trừ file _autoload.txt
+            if fileName and fileName ~= "_autoload" then 
+                table.insert(configs, fileName) 
+            end
+        end
+    end
+    table.sort(configs)
+    return configs
+end
+
+function ConfigSystem.refreshDropdown()
+    local configs = ConfigSystem.getConfigList()
+    if #configs == 0 then
+        configs = {"[Chưa có config - Tạo mới trước]"}
+    end
+    
+    -- Dùng phương thức Refresh của WindUI
+    if ConfigSystem.dropdownRef then
+        ConfigSystem.dropdownRef:Refresh(configs)
+    end
+    
+    return configs
+end
+
+-- HÀM REGISTER UI ELEMENT (GỌI TỪ CODE TẠO UI)
+function ConfigSystem.registerUIElement(key, element)
+    ConfigSystem.UIElements[key] = element
+    warn("✅ Registered UI:", key)  -- ✅ THÊM DEBUG
+end
+
+local Section1 = Window:Section({
+    Title = "Main",
+    Icon = "bird",
+    Opened = false,
+})
+local Section2 = Window:Section({
+    Title = "AutoSell",
+    Icon = "bird",
+    Opened = false,
+})
+
+local Tab1 = Section1:Tab({
+    Title = "Farm",
+    Icon = "bird", -- optional
+    Locked = false,
+})
+local Tab2 = Section1:Tab({
+    Title = "Settings",
+    Icon = "bird", -- optional
+    Locked = false,
+})
+local Tab3 = Section1:Tab({
+    Title = "Weapons",
+    Icon = "bird", -- optional
+    Locked = false,
+})
+local Tab4 = Section1:Tab({
+    Title = "Events",
+    Icon = "bird", -- optional
+    Locked = false,
+})
+do
+--killauraline
+local KillauraToggle = Tab1:Toggle({
+    Title = "Kill Aura",
+    Desc = "nothing",
+    Icon = "bird",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(cU)
+        Toggles.Killaura:SetValue(cU)
+        bu = bu + 1;
+        if not cU then
+            return
+        end
+        local gc = bc[eo][ep]
+        ak = tick()
+        task.spawn(function()
+            local gd;
+            local ge = 67;
+            
+            while Toggles.Killaura.Value and aC do
+                ab, ac, ad, ae, af, ag, ah = getClosestMob(bY)
+                if alive() and ab then
+                    task.spawn(function()
+                        if not gd then
+                            gd = true;
+                            if Toggles.PerkSwitcher.Value and cl[b9].Offhand then
+                                local gf = OffhandPerksActive()
+                                if ag and not gf then
+                                    SwitchOffhandPerks(true)
+                                end
+                                if not ag and gf then
+                                    SwitchOffhandPerks(false)
+                                end
+                            end
+                            local gg = b4:GetChildren()[1]
+                            if gg and gg:FindFirstChild('ID') and gg.ID.Value then
+                                local gh = gg.ID.Value;
+                                local gi = Options.mobWepId.Value and #Options.mobWepId.Value > 2 and Options.mobWepId.Value;
+                                local gj = Options.bossWepId.Value and #Options.bossWepId.Value > 2 and
+                                            Options.bossWepId.Value;
+                                if gi and not ag and gh ~= gi then
+                                    equipWepWithId(gi, ' Mobs!')
+                                    task.wait(0.5)
+                                end
+                                if gj and ag and gh ~= gj then
+                                    equipWepWithId(gj, ' Bosses!')
+                                    task.wait(0.5)
+                                end
+                            end
+                            gd = false
+                        end
+                    end)
+                    if not mounted() then
+                        for dj, gk in cl[b9].Skills do
+                            local gl, gm = gk.MeleeOnBoss and ag and 'Melee' or gk.Type or cl[b9].Type, gk.Skill;
+                            local gn = gk.MeleeOnBoss and ag and gk.BossRange or gk.Range or cl[b9].Range;
+                            local go = gk.Cooldown + Options.KillauraDelay.Value;
+                            if tick() - (gk.LastUsed or 0) >= go then
+                                if gl ~= 'Heal' and ae <= gn and ah.Value > 0 then
+                                    if gl == 'Melee' then
+                                        bk:FireServer(gm, aU.Position, (ac - aU.Position).Unit, ge)
+                                    elseif gl == 'Ranged' then
+                                        bk:FireServer(gm, ac, nil, ge)
+                                    elseif gl == 'Self' then
+                                        bk:FireServer(gm, aU.Position, nil, ge)
+                                    elseif gl == 'Remote' then
+                                        if gk.Args == 'MobPosition' then
+                                            gm:FireServer(ad, nil, nil, ge)
+                                        elseif gk.Args == 'mobTbl' then
+                                            gm:FireServer({ab.Parent}, nil, nil, ge)
+                                        else
+                                            gm:FireServer(nil, nil, nil, ge)
+                                        end
+                                    end
+                                    gk.LastUsed = tick()
+                                    ak = tick()
+                                end
+                                if gl == 'Heal' and aV.Health.Value / aV.MaxHealth.Value < 0.6 then
+                                    gm:FireServer(gk.Args or nil, nil, nil, ge)
+                                    gk.LastUsed = tick()
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait()
+            end
+        end)
+        if aC and not ax:FindFirstChild(36) and aC then
+            task.spawn(function()
+                while Toggles.Killaura.Value do
+                    for z, R in aw:GetChildren() do
+                        local A = R:FindFirstChild("HealthProperties", true)
+                        if A and not table.find(c9, A.Parent.Name) then
+                            table.insert(aS, A.Parent)
+                            A.Parent.Parent = bl
+                        end
+                    end
+                    task.wait(0.3333)
+                end
+            end)
+        end
+        if classCheck(eo) and Toggles.Killaura.Value and bloodBindingEnabled and aC then
+            task.spawn(function()
+                while Toggles.Killaura.Value do
+                    if classCheck(eo) then
+                        if alive() and not mounted() and not aT:FindFirstChild('AttackBuffDemonBloodBinding', true) and ab and
+                            ae and ae <= 95 then
+                            bc.Demon.BloodBinding:FireServer()
+                            ak = tick()
+                            task.wait(6)
+                        end
+                    end
+                    task.wait()
+                end
+            end)
+        end
+        if classCheck('Summoner') and Toggles.Killaura.Value and aC then
+            task.spawn(function()
+                while Toggles.Killaura.Value do
+                    for dj, Mob in bl:GetChildren() do
+                        if Mob.Name == 'SummonerSummonWeak' or Mob.Name == 'SummonerSummonStrong' then
+                            Mob.Parent = cm
+                        end
+                    end
+                    for dj, gp in cm:GetChildren() do
+                        if gp.PrimaryPart then
+                            if ab then
+                                gp.PrimaryPart.CFrame = CFrame.new(ad)
+                            end
+                            if gp:FindFirstChild('HealthProperties') and gp.HealthProperties:FindFirstChild('Health') and
+                                gp.HealthProperties.Health.Value > 0 and gp.HealthProperties.Health.Value /
+                                gp.HealthProperties.MaxHealth.Value <= 0.25 then
+                                bc.Summoner.ExplodeSummons:FireServer()
+                            end
+                        end
+                    end
+                    b_:Wait()
+                end
+            end)
+        end
+        if aC then
+            task.spawn(function()
+                while Toggles.Killaura.Value and not aQ do
+                    if Toggles.Autofarm.Value and not bX then
+                        task.wait(0.5)
+                        if tick() - ak >= Options.timeoutTimer.Value then
+                            local gq = Options.Offset.Value;
+                            Options.Offset:SetValue(0)
+                            task.wait(3)
+                            if tick() - ak >= Options.timeoutTimer.Value then
+                                libNoti('Timeout! Force restarting dungeon!')
+                                missionEndRestartOrNextEvent()
+                                break
+                            else
+                                Options.Offset:SetValue(gq)
+                            end
+                        end
+                    end
+                    task.wait(1)
+                end
+            end)
+        end
+    end})
+ConfigSystem.registerUIElement("Killaura", KillauraToggle)       
+-- killauradelayline
+local KillauraDelaySlider = Tab1:Slider({
+    Title = "Killaura Delay",
+    Desc = "Độ trễ giữa các đòn đánh (giây)",
+    Step = 0.01,
+    Value = {
+        Min = 0,
+        Max = 1,
+        Default = 0,
+    },
+    Callback = function(value)
+        Options.KillauraDelay:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("KillauraDelay", KillauraDelaySlider)
+--autofarmline
+local AutofarmToggle = Tab1:Toggle({
+    Title = "Auto Farm",
+    Desc = "Tự động farm và hoàn thành nhiệm vụ",
+    Icon = "zap",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(fn)
+    Toggles.Autofarm:SetValue(fn)
     ak = tick()
     bX = false;
     if not fn then
@@ -5600,9 +4756,55 @@ Toggles.Autofarm:OnChanged(function(fn)
             AntiFling()
         end
         MobCounter()
+        -- ============== AUTO SKILL USAGE ==============
+        task.spawn(function()
+            local lastSkillUse = {}
+            
+            while Toggles.Autofarm.Value and aC do
+                if alive() and bd > 0 then  -- Chỉ dùng skill khi có mob
+                    local skills = {
+                        {"Demon", "BloodBinding", 3},
+                        {"Dragoon", "DragonSlam", 3},
+                        {"Guardian", "AggroDraw", 5},
+                        {"DualWielder", "AttackBuff", 5},
+                        {"Guardian", "UpdateSpeed", 8},
+                        {"Paladin", "LightThurst", 3},
+                        {"Paladin", "GuildedLight", 5},
+                        {"MageOfLight", "Infuse", 6}
+                    }
+                    
+                    for _, skill in ipairs(skills) do
+                        local skillset, action, cooldown = skill[1], skill[2], skill[3] or 3
+                        local skillKey = skillset .. "_" .. action
+                        local currentTime = tick()
+                        
+                        -- Kiểm tra cooldown
+                        if not lastSkillUse[skillKey] or (currentTime - lastSkillUse[skillKey] >= cooldown) then
+                            local skillFolder = bc:FindFirstChild(skillset)
+                            
+                            if skillFolder then
+                                local skillAction = skillFolder:FindFirstChild(action)
+                                if skillAction and skillAction:IsA("RemoteEvent") then
+                                    local success = pcall(function()
+                                        skillAction:FireServer()
+                                    end)
+                                    
+                                    if success then
+                                        lastSkillUse[skillKey] = currentTime
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                task.wait(0.5)  -- Check mỗi 0.5 giây để dùng skill nhanh hơn
+            end
+        end)
+        -- ============== END AUTO SKILL USAGE ==============        
         local ft = false;
         for z, R in ca do
-            if ax:FindFirstChild(R.Id) then
+            -- ✅ SỬA: Check cả ax:FindFirstChild(R.Id) VÀ ay == R.Id
+            if ax:FindFirstChild(R.Id) or ay == R.Id then
                 ft = true;
                 if R.ignoreMob then
                     MobTeleportIgnore(R.ignoreMob, R.mobWaitTbl, R.mobWaitTime, R.alwaysWait)
@@ -5882,485 +5084,2020 @@ Toggles.Autofarm:OnChanged(function(fn)
             end)
         end
     end
-end)
-task.spawn(function()
-    workspace:WaitForChild("Mobs").ChildAdded:Connect(function(bA)
-        bA:WaitForChild("HealthProperties"):WaitForChild("Health").Changed:Connect(function(cU)
-            if cU == 0 then
-                game:GetService("Debris"):AddItem(bA, 0.2)
-            end
-        end)
-    end)
-    if workspace:FindFirstChild('Assets_FX') then
-        for z, R in workspace.Assets_FX:GetChildren() do
-            R:Destroy()
-        end
-        workspace.Assets_FX.ChildAdded:Connect(function(ck)
-            ck:Destroy()
-        end)
+    
     end
-    local cj = require(game.ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Effects"))
-    local fM = cj.DoEffect;
-    cj.DoEffect = function(self, ...)
-        if Toggles.disableEffects.Value then
+})
+ConfigSystem.registerUIElement("Autofarm", AutofarmToggle)
+-- Thêm vào Tab1 (Farm tab), sau toggle CollectDrops (khoảng dòng 5007):
+
+--collectbufforb line
+local CollectBuffOrbToggle = Tab1:Toggle({
+    Title = "Auto Collect Buff Orbs",
+    Desc = "Tự động lụm DamageBuffOrb, HealthBuffOrb, UltChargeBuffOrb",
+    Icon = "sparkles",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.CollectBuffOrb:SetValue(state)
+        
+        if state then
+            -- Bật auto collect buff orbs
+            task.spawn(function()
+                while Toggles.CollectBuffOrb.Value and Toggles.Autofarm.Value and aC do
+                    if alive() then
+                        local closestOrb = nil
+                        local closestDist = math.huge
+                        
+                        -- Tìm buff orb gần nhất
+                        for _, obj in pairs(workspace:GetChildren()) do
+                            if obj.Name:find("BuffOrb") and obj:IsA("Model") and obj.PrimaryPart then
+                                local dist = (aU.Position - obj.PrimaryPart.Position).magnitude
+                                if dist < closestDist and dist < 350 then -- Trong phạm vi 150 studs
+                                    closestOrb = obj
+                                    closestDist = dist
+                                end
+                            end
+                        end
+                        
+                        -- Nếu tìm thấy orb, tạm dừng autofarm và lụm
+                        if closestOrb and closestOrb.PrimaryPart then
+                            local orbType = closestOrb.Name:gsub("BuffOrb", "")
+                            
+                            -- ✅ TẮT a8 để dừng MobTeleport
+                            local wasActive = a8
+                            a8 = false
+                            
+                            -- Teleport đến orb nhiều lần để đảm bảo lụm được
+                            local orbPos = closestOrb.PrimaryPart.Position
+                            for i = 1, 2 do
+                                if not closestOrb or not closestOrb.Parent then
+                                    -- Orb đã biến mất (đã lụm được)
+                                    break
+                                end
+                                aT:SetPrimaryPartCFrame(CFrame.new(orbPos))
+                                task.wait(0.1)
+                            end
+                            
+                            -- ✅ BẬT lại a8
+                            a8 = wasActive
+                            
+                            -- Đợi orb biến mất hoặc timeout
+                            local startTime = tick()
+                            while closestOrb and closestOrb.Parent and tick() - startTime < 0.5 do
+                                task.wait(0.1)
+                            end
+                        end
+                    end
+                    task.wait(1) -- Check mỗi 1 giây
+                end
+            end)
+        end
+    end
+})
+ConfigSystem.registerUIElement("CollectBuffOrb", CollectBuffOrbToggle)
+-- offsetline
+local OffsetSlider = Tab1:Slider({
+    Title = "Offset",
+    Desc = "Khoảng cách tấn công quái (Ranged: 50, Melee: 7)",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = aC and (isRangedClass() and 75 or 25) or 75,
+        Default = isRangedClass() and 50 or 7,
+    },
+    Callback = function(value)
+        Options.Offset:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("Offset", OffsetSlider)
+-- healpercentline
+local HealPercentSlider = Tab1:Slider({
+    Title = "Heal At",
+    Desc = "Hồi máu khi HP xuống dưới % này",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = 100,
+        Default = 30,
+    },
+    Callback = function(value)
+        Options.healPercent:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("healPercent", HealPercentSlider)
+-- resumepercentline
+local ResumePercentSlider = Tab1:Slider({
+    Title = "Resume At",
+    Desc = "Tiếp tục farm khi HP đạt % này",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = 100,
+        Default = 100,
+    },
+    Callback = function(value)
+        Options.resumePercent:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("resumePercent", ResumePercentSlider)
+--autocollectdropsline
+local CollectDropsToggle = Tab1:Toggle({
+    Title = "Auto Collect Drops",
+    Desc = "Tự động thu thập vật phẩm rơi",
+    Icon = "package",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        -- CẬP NHẬT WRAPPER - QUAN TRỌNG!
+        Toggles.CollectDrops:SetValue(state)
+        
+        if not state then
             return
         end
-        local fN = {...}
-        if ay and ay == 27 and fN[1] == "RadialIndicator" and Toggles.Autofarm.Value then
-            fN[5] = fN[5] + 1;
-            return fM(self, unpack(fN))
-        end
-        return fM(self, ...)
-    end
-end)
-local fO = {}
-local fP = {}
-local fQ = {}
-local fR = game:GetService("ReplicatedStorage").Shared.Mobs.Mobs;
-for z, R in fR:GetDescendants() do
-    if R:IsA('RemoteEvent') then
-        local fS = true;
-        if R.Parent and table.find(fO, R.Parent.Name) then
-            fS = false
-        end
-        for dZ, F in fP do
-            if table.find(F, R.Name) and R.Parent and R.Parent.Name == dZ then
-                fS = false
-            end
-        end
-        if fS and table.find(fQ, R.Name) then
-            fS = false
-        end
-        if fS then
-            R:Destroy()
-        end
-    end
-end
-do
-    function getBoundingBox(bx)
-        local fT = bx.Size;
-        local fU = bx.Position - fT / 2;
-        local fV = bx.Position + fT / 2;
-        return fU, fV
-    end
-    function getClosestPointOnAABB(fW, fU, fV)
-        local fX = Vector3.new(math.clamp(fW.X, fU.X, fV.X), math.clamp(fW.Y, fU.Y, fV.Y), math.clamp(fW.Z, fU.Z, fV.Z))
-        return fX
-    end
-    function getClosestPointAndDistance(fY, fZ)
-        if not fY or not fZ then
-            return math.huge, nil
-        end
-        local f_ = fY.Position;
-        local fU, fV = getBoundingBox(fZ)
-        local fX = getClosestPointOnAABB(f_, fU, fV)
-        local g0 = (fZ.Position - fX).Unit;
-        fX = fX + g0 * 0.1;
-        if Toggles.Autofarm.Value and isRangedClass() then
-            local g1 = olympus and Options['testOffset'] and Options.testOffset.Value or aR[fZ.Parent.Name] or 0;
-            fX = fX + Vector3.new(0, g1, 0)
-        end
-        local g2 = (fX - f_).Magnitude;
-        return g2, fX
-    end
-    function getClosestMob(g3)
-        local g4 = math.huge;
-        local g5, fX, g6, ad, ag;
-        local ey, g7, ec;
-        if g3 and isAlive(g3) then
-            local g8 = g3.PrimaryPart;
-            local g2, g9 = getClosestPointAndDistance(aU, g8)
-            g4, fX, g5 = g2, g9, g8
-        else
-            for dj, bA in bl:GetChildren() do
-                if isAlive(bA) and not ignoreIfNotAlone(bA.Name) then
-                    local g8 = bA.PrimaryPart;
-                    local g2, g9 = getClosestPointAndDistance(aU, g8)
-                    if g2 < g4 then
-                        g4, fX, g5 = g2, g9, g8
-                    end
-                end
-            end
-        end
-        if g5 then
-            ey, g7, ec = Mob(g5.Parent.Name), g5.Parent.HealthProperties.Health, g5.Parent.Name;
-            ad = g5.Position;
-            g6 = (aU.Position - ad).magnitude;
-            ag = ey and ey['BossTag']
-        end
-        return g5, fX, ad, g4, g6, ag, g7
-    end
-    function equipWepWithId(ga, e5)
-        for z, R in bM:GetChildren() do
-            if R:FindFirstChild('ID') and R.ID.Value and R.ID.Value == ga then
-                bT:FireServer(R, b4)
-                libNoti('Equipped ' .. bR[R.Name].DisplayKey .. ' for' .. e5)
-                break
-            end
-        end
-    end
-end
-local gb = {'CorruptedGreaterTree'}
-function ignoreIfNotAlone(ec)
-    if bd and bd > 1 and table.find(gb, ec) then
-        return true
-    end
-end
-Toggles.Killaura:OnChanged(function(cU)
-    bu = bu + 1;
-    if not cU then
-        return
-    end
-    local gc = bc[eo][ep]
-    ak = tick()
-    task.spawn(function()
-        local gd;
-        local ge = 67;
-        while Toggles.Killaura.Value and aC do
-            ab, ac, ad, ae, af, ag, ah = getClosestMob(bY)
-            if alive() and ab then
-                task.spawn(function()
-                    if not gd then
-                        gd = true;
-                        if Toggles.PerkSwitcher.Value and cl[b9].Offhand then
-                            local gf = OffhandPerksActive()
-                            if ag and not gf then
-                                SwitchOffhandPerks(true)
-                            end
-                            if not ag and gf then
-                                SwitchOffhandPerks(false)
-                            end
-                        end
-                        local gg = b4:GetChildren()[1]
-                        if gg and gg:FindFirstChild('ID') and gg.ID.Value then
-                            local gh = gg.ID.Value;
-                            local gi = Options.mobWepId.Value and #Options.mobWepId.Value > 2 and Options.mobWepId.Value;
-                            local gj = Options.bossWepId.Value and #Options.bossWepId.Value > 2 and
-                                           Options.bossWepId.Value;
-                            if gi and not ag and gh ~= gi then
-                                equipWepWithId(gi, ' Mobs!')
-                                task.wait(0.5)
-                            end
-                            if gj and ag and gh ~= gj then
-                                equipWepWithId(gj, ' Bosses!')
-                                task.wait(0.5)
-                            end
-                        end
-                        gd = false
-                    end
-                end)
-                if not mounted() then
-                    for dj, gk in cl[b9].Skills do
-                        local gl, gm = gk.MeleeOnBoss and ag and 'Melee' or gk.Type or cl[b9].Type, gk.Skill;
-                        local gn = gk.MeleeOnBoss and ag and gk.BossRange or gk.Range or cl[b9].Range;
-                        local go = gk.Cooldown + Options.KillauraDelay.Value;
-                        if tick() - (gk.LastUsed or 0) >= go then
-                            if gl ~= 'Heal' and ae <= gn and ah.Value > 0 then
-                                if gl == 'Melee' then
-                                    bk:FireServer(gm, aU.Position, (ac - aU.Position).Unit, ge)
-                                elseif gl == 'Ranged' then
-                                    bk:FireServer(gm, ac, nil, ge)
-                                elseif gl == 'Self' then
-                                    bk:FireServer(gm, aU.Position, nil, ge)
-                                elseif gl == 'Remote' then
-                                    if gk.Args == 'MobPosition' then
-                                        gm:FireServer(ad, nil, nil, ge)
-                                    elseif gk.Args == 'mobTbl' then
-                                        gm:FireServer({ab.Parent}, nil, nil, ge)
-                                    else
-                                        gm:FireServer(nil, nil, nil, ge)
-                                    end
-                                end
-                                gk.LastUsed = tick()
-                                ak = tick()
-                            end
-                            if gl == 'Heal' and aV.Health.Value / aV.MaxHealth.Value < 0.6 then
-                                gm:FireServer(gk.Args or nil, nil, nil, ge)
-                                gk.LastUsed = tick()
-                            end
-                        end
-                    end
-                end
-            end
-            task.wait()
-        end
-    end)
-    if aC and not ax:FindFirstChild(36) and aC then
+        
         task.spawn(function()
-            while Toggles.Killaura.Value do
-                for z, R in aw:GetChildren() do
-                    local A = R:FindFirstChild("HealthProperties", true)
-                    if A and not table.find(c9, A.Parent.Name) then
-                        table.insert(aS, A.Parent)
-                        A.Parent.Parent = bl
-                    end
-                end
-                task.wait(0.3333)
-            end
-        end)
-    end
-    if classCheck(eo) and Toggles.Killaura.Value and bloodBindingEnabled and aC then
-        task.spawn(function()
-            while Toggles.Killaura.Value do
-                if classCheck(eo) then
-                    if alive() and not mounted() and not aT:FindFirstChild('AttackBuffDemonBloodBinding', true) and ab and
-                        ae and ae <= 95 then
-                        bc.Demon.BloodBinding:FireServer()
-                        ak = tick()
-                        task.wait(6)
-                    end
+            while Toggles.CollectDrops.Value do  -- Dùng Toggles.CollectDrops.Value cho nhất quán
+                for gr, gs in aY do
+                    gs.model:Destroy()
+                    gs.followPart:Destroy()
+                    table.remove(aY, gr)
+                    aZ:FireServer(gs.id)
                 end
                 task.wait()
             end
         end)
     end
-    if classCheck('Summoner') and Toggles.Killaura.Value and aC then
-        task.spawn(function()
-            while Toggles.Killaura.Value do
-                for dj, Mob in bl:GetChildren() do
-                    if Mob.Name == 'SummonerSummonWeak' or Mob.Name == 'SummonerSummonStrong' then
-                        Mob.Parent = cm
-                    end
-                end
-                for dj, gp in cm:GetChildren() do
-                    if gp.PrimaryPart then
-                        if ab then
-                            gp.PrimaryPart.CFrame = CFrame.new(ad)
-                        end
-                        if gp:FindFirstChild('HealthProperties') and gp.HealthProperties:FindFirstChild('Health') and
-                            gp.HealthProperties.Health.Value > 0 and gp.HealthProperties.Health.Value /
-                            gp.HealthProperties.MaxHealth.Value <= 0.25 then
-                            bc.Summoner.ExplodeSummons:FireServer()
-                        end
-                    end
-                end
-                b_:Wait()
-            end
-        end)
-    end
-    if aC then
-        task.spawn(function()
-            while Toggles.Killaura.Value and not aQ do
-                if Toggles.Autofarm.Value and not bX then
-                    task.wait(0.5)
-                    if tick() - ak >= Options.timeoutTimer.Value then
-                        local gq = Options.Offset.Value;
-                        Options.Offset:SetValue(0)
-                        task.wait(3)
-                        if tick() - ak >= Options.timeoutTimer.Value then
-                            libNoti('Timeout! Force restarting dungeon!')
-                            missionEndRestartOrNextEvent()
-                            break
-                        else
-                            Options.Offset:SetValue(gq)
-                        end
-                    end
-                end
-                task.wait(1)
-            end
-        end)
-    end
-end)
-Toggles.CollectDrops:OnChanged(function()
-    task.spawn(function()
-        while Toggles.CollectDrops.Value do
-            for gr, gs in aY do
-                gs.model:Destroy()
-                gs.followPart:Destroy()
-                table.remove(aY, gr)
-                aZ:FireServer(gs.id)
-            end
-            task.wait()
-        end
-    end)
-end)
-Toggles.autoEquipBestwWep:OnChanged(function(cU)
-    if not cU then
-        return
-    end
-    task.spawn(function()
-        while Toggles.autoEquipBestwWep.Value do
-            local gt, gu = 0, 0;
-            local gv, gw;
-            local gg = b4:GetChildren()[1]
-            if gg then
-                gt = bS:GetItemStats(gg)['Attack'] or 0
-            end
-            local gx, gy = 0, 0;
-            local gz, gA;
-            local gB = b6:GetChildren()[1]
-            if gB then
-                gx = bS:GetItemStats(gB)['Defense'] or 0
-            end
-            for z, R in bM:GetChildren() do
-                if R:FindFirstChild('Level') and R.Level.Value <= a_.Level.Value then
-                    local gC = bR[R.Name]
-                    local gD, gE = gC.Type == 'Weapon', gC.Type == 'Armor'
-                    local gF, gG = gD and bS:GetItemStats(R)['Attack'], gE and bS:GetItemStats(R)['Defense']
-                    if gD and gF and gF > gt and gF > gu then
-                        gv = R;
-                        gu = gF;
-                        gw = gC.DisplayKey
-                    end
-                    if gE and gG and gG > gx and gG > gy then
-                        gz = R;
-                        gy = gG;
-                        gA = gC.DisplayKey
-                    end
-                end
-            end
-            if gv then
-                libNoti('Equipped a T' .. c0:GetItemTier(gv) .. ' ' .. gw .. ' - Power: ' .. gu)
-                bT:FireServer(gv, b4)
-            end
-            if gz then
-                libNoti('Equipped a T' .. c0:GetItemTier(gz) .. ' ' .. gA .. ' - Defense: ' .. gy)
-                bT:FireServer(gz, b6)
-            end
-            task.wait(2)
-        end
-    end)
-end)
-local cj = require(game.ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Effects"))
-local gH = cj.RenderDamageNumber;
-Toggles.NVD:OnChanged(function()
-    cj.RenderDamageNumber = function(...)
-        if Toggles.NVD.Value then
+})
+ConfigSystem.registerUIElement("CollectDrops", CollectDropsToggle)
+
+
+--autoequipbestweaponline
+local AutoEquipBestWeaponToggle = Tab1:Toggle({
+    Title = "AutoEquip Best Weapon",
+    Desc = "Tự động trang bị vũ khí tốt nhất",
+    Icon = "shield",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(cU)
+        -- CẬP NHẬT WRAPPER
+        Toggles.autoEquipBestwWep:SetValue(cU)
+        
+        if not cU then
             return
         end
-        return gH(...)
-    end
-end)
-Options.FastSprint:OnChanged(function()
-    bU.SPRINT_WALKSPEED = Options.FastSprint.Value
-end)
-
--- ============================================================================
--- LIBRARY CONFIGURATION SECTION
--- ============================================================================
--- Setup Theme Manager and Save Manager (previously cq and cr)
-cq:SetLibrary(cp)        -- Connect ThemeManager to main library
-cr:SetLibrary(cp)        -- Connect SaveManager to main library
-cr:IgnoreThemeSettings() -- Don't save theme settings
-cr:SetIgnoreIndexes({'MenuKeybind'}) -- Don't save menu keybind
-
--- Set folder for saving configurations  
-cq:SetFolder('MyScriptHub')
-cr:SetFolder('MyScriptHub')
-
--- Build configuration sections in Settings tab
-cr:BuildConfigSection(cA['Settings'])  -- Add save/load config section
-cq:ApplyToTab(cA['Settings'])          -- Add theme options
-
--- Menu controls
-local gI = cA['Settings']:AddRightGroupbox('Menu')
-gI:AddButton('Unload', function()
-    cp:Unload() -- Unload the entire UI
-end)
-
--- Menu keybind setup
-gI:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', {
-    Default = 'LeftAlt',
-    NoUI = false,
-    Text = 'Menu keybind'
-})
-cp.ToggleKeybind = Options.MenuKeybind; -- Set the toggle keybind
-
--- Auto-load configuration with timeout
-local gJ = tick()
-while tick() - gJ < 60 do
-    if aC then
-        cr:LoadAutoloadConfig() -- Load saved configuration
         
-        -- Special dungeon offset check
-        if ay and ax:FindFirstChild(24) then
-            if Options.Offset.Value > 45 then
-                Options.Offset:SetValue(45)
-                libNoti('Set offset to 45 to avoid death')
-            end
-        end
-        break
-    end
-    task.wait()
-end
-if Toggles.autoHide.Value and aC then
-    task.wait(0.25)
-    cp:Toggle() -- Hide the UI if auto-hide is enabled
-end
-
--- Check for gamepass ownership
-pcall(function()
-    aa = game:GetService("MarketplaceService"):UserOwnsGamePassAsync(d, 8136250)
-end)
-
--- Safety check system - continuously monitor for danger zones
-task.spawn(function()
-    while wait(0.5) do -- Check every 0.5 seconds (reduced frequency to avoid conflicts)
-        if Toggles.Autofarm and Toggles.Autofarm.Value and aT and aT.Character and aT.Character:FindFirstChild("HumanoidRootPart") then
-            local humanoidRootPart = aT.Character.HumanoidRootPart
-            
-            -- Only run safety check if not actively teleporting to avoid conflicts
-            if not bY then -- bY is set when actively targeting a mob
-                pcall(function()
-                    if isPositionInConeIndicator(humanoidRootPart.Position) then
-                        print("[Emergency] Player in danger zone! Moving to safety...")
-                        local safePos = getSafePositionNearTarget(humanoidRootPart.Position)
-                        if safePos then
-                            humanoidRootPart.CFrame = CFrame.new(safePos)
-                            print("[Emergency] Moved to safe position:", safePos)
-                        else
-                            -- Emergency high altitude escape
-                            humanoidRootPart.CFrame = CFrame.new(humanoidRootPart.Position + Vector3.new(0, 100, 0))
-                            print("[Emergency] Escaped to high altitude")
+        task.spawn(function()
+            while Toggles.autoEquipBestwWep.Value do
+                local gt, gu = 0, 0;
+                local gv, gw;
+                local gg = b4:GetChildren()[1]
+                if gg then
+                    gt = bS:GetItemStats(gg)['Attack'] or 0
+                end
+                local gx, gy = 0, 0;
+                local gz, gA;
+                local gB = b6:GetChildren()[1]
+                if gB then
+                    gx = bS:GetItemStats(gB)['Defense'] or 0
+                end
+                for z, R in bM:GetChildren() do
+                    if R:FindFirstChild('Level') and R.Level.Value <= a_.Level.Value then
+                        local gC = bR[R.Name]
+                        local gD, gE = gC.Type == 'Weapon', gC.Type == 'Armor'
+                        local gF, gG = gD and bS:GetItemStats(R)['Attack'], gE and bS:GetItemStats(R)['Defense']
+                        if gD and gF and gF > gt and gF > gu then
+                            gv = R;
+                            gu = gF;
+                            gw = gC.DisplayKey
+                        end
+                        if gE and gG and gG > gx and gG > gy then
+                            gz = R;
+                            gy = gG;
+                            gA = gC.DisplayKey
                         end
                     end
-                end)
+                end
+                if gv then
+                    libNoti('Equipped a T' .. c0:GetItemTier(gv) .. ' ' .. gw .. ' - Power: ' .. gu)
+                    bT:FireServer(gv, b4)
+                end
+                if gz then
+                    libNoti('Equipped a T' .. c0:GetItemTier(gz) .. ' ' .. gA .. ' - Defense: ' .. gy)
+                    bT:FireServer(gz, b6)
+                end
+                task.wait(2)
             end
+        end)
+    end
+})
+ConfigSystem.registerUIElement("autoEquipBestwWep", AutoEquipToggle)
+
+--nodamagenumbersline
+local NVDToggle = Tab1:Toggle({
+    Title = "No Damage Numbers",
+    Desc = "Ẩn số sát thương hiển thị",
+    Icon = "eye-off",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.NVD:SetValue(state)
+        -- Hook đã được setup ở trên, chỉ cần update giá trị
+    end
+})
+ConfigSystem.registerUIElement("NVD", NVDToggle)
+--collecteggchestsline
+local CollectEggChestsToggle = Tab1:Toggle({
+    Title = "Collect Egg Chests",
+    Desc = "Tự động thu thập rương trứng",
+    Icon = "egg",
+    Type = "Checkbox",
+    Default = true,
+    Callback = function(state)
+        Toggles.collectEggChests:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("collectEggChests", CollectEggChestsToggle)
+
+--restartdungeonline
+local RestartDungeonToggle = Tab1:Toggle({
+    Title = "Restart Dungeon",
+    Desc = "Tự động restart dungeon sau khi hoàn thành",
+    Icon = "refresh-ccw",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.RestartDungeon:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("RestartDungeon", RestartDungeonToggle)
+--nightmareloopline
+local NightmareLoopToggle = Tab1:Toggle({
+    Title = "Nightmare Loop",
+    Desc = "Tự động loop nightmare dungeons",
+    Icon = "moon",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.nightmareLoop:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("nightmareLoop", NightmareLoopToggle)
+--nextdungeonline
+local NextDungeonToggle = Tab1:Toggle({
+    Title = "Next Dungeon",
+    Desc = "Tự động chuyển sang dungeon tiếp theo",
+    Icon = "arrow-right",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.NextDungeon:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("NextDungeon", NextDungeonToggle)
+
+--perkswitcherline
+local PerkSwitcherToggle = Tab1:Toggle({
+    Title = "Auto Switch Perks",
+    Desc = "Bật Primary Perks cho mob, Offhand Perks cho boss",
+    Icon = "zap",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.PerkSwitcher:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("PerkSwitcher", PerkSwitcherToggle)
+
+--mobcameraline
+local MobCameraToggle = Tab1:Toggle({
+    Title = "Mob POV",
+    Desc = "Camera nhìn theo góc nhìn quái vật",
+    Icon = "eye",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.mobCamera:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("mobCamera", MobCameraToggle)
+
+
+-- fastsprintline
+local FastSprintSlider = Tab1:Slider({
+    Title = "Fast Sprint",
+    Desc = "Tốc độ di chuyển nhanh",
+    Step = 1,
+    Value = {
+        Min = 16,
+        Max = 100,
+        Default = 25,
+    },
+    Callback = function(value)
+        Options.FastSprint:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("FastSprint", FastSprintSlider)
+-- Thêm sau FastSprintSlider, trước phần Tab2
+
+-- restartdungeonbuttonline
+-- restartdungeonbuttonline
+local RestartDungeonButton = Tab1:Button({
+    Title = "Restart Current Dungeon",
+    Description = "Restart dungeon/tower hiện tại ngay lập tức (nhấn đúp)",
+    Callback = function()
+        -- Kiểm tra có đang ở trong dungeon/mission không
+        if not aC then
+            WindUI:Notify({
+                Title = "Restart Dungeon",
+                Content = "Bạn không ở trong dungeon/tower nào!",
+                Duration = 3
+            })
+            return
         end
+        
+        -- Lấy mission ID từ ActiveMission
+        local currentMissionId = a4:FindFirstChild("ActiveMission") and a4.ActiveMission.Value or ay
+        
+        if not currentMissionId then
+            WindUI:Notify({
+                Title = "Restart Dungeon",
+                Content = "Không tìm thấy thông tin dungeon/tower!",
+                Duration = 3
+            })
+            return
+        end
+        
+        -- Lấy difficulty (nếu có)
+        local currentDifficulty = nil
+        if aF then
+            -- Dungeon thường có difficulty
+            currentDifficulty = az or a5.Missions.GetDifficulty:InvokeServer()
+        elseif aH then
+            -- Tower không có difficulty
+            currentDifficulty = nil
+        elseif aI or aJ then
+            -- Infinite/Celestial Tower không có difficulty
+            currentDifficulty = nil
+        elseif aK then
+            -- Nightmare dungeon
+            currentDifficulty = az or 1
+        elseif aL then
+            -- Event raid
+            currentDifficulty = nil
+        end
+        
+        -- Lấy tên mission
+        local missionName = bO[currentMissionId] and bO[currentMissionId].NameTag or "Unknown"
+        local difficultyText = ""
+        if currentDifficulty then
+            difficultyText = currentDifficulty == 1 and " (Normal)" or currentDifficulty == 5 and " (Challenge)" or ""
+        end
+        
+        WindUI:Notify({
+            Title = "Restart Dungeon",
+            Content = "Đang restart " .. missionName .. difficultyText .. "...",
+            Duration = 3
+        })
+        
+        -- Leave dungeon
+        game:GetService("ReplicatedStorage").Shared.Missions.LeaveChoice:FireServer(true)
+        game:GetService("ReplicatedStorage").Shared.Missions.NotifyReadyToLeave:FireServer()
+        
+        -- Wait và restart
+        task.wait(2)
+        StartRaid(currentMissionId, currentDifficulty)
+    end
+})
+ConfigSystem.registerUIElement("RestartDungeon", RestartDungeonToggle)
+end
+-- dungeonrestarttimerline
+local DungeonRestartTimerSlider = Tab2:Slider({
+    Title = "Dungeon Restart Timer",
+    Desc = "Thời gian chờ trước khi restart dungeon (giây)",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = 20,
+        Default = 3,
+    },
+    Callback = function(value)
+        Options.dungeonRestartTimer:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("dungeonRestartTimer", DungeonRestartTimerSlider)
+
+-- restarttowertimerline
+local TowerRestartTimerSlider = Tab2:Slider({
+    Title = "Tower Restart Timer",
+    Desc = "Thời gian chờ trước khi restart tower (giây)",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = 20,
+        Default = 3,
+    },
+    Callback = function(value)
+        Options.towerRestartTimer:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("towerRestartTimer", TowerRestartTimerSlider)
+
+-- dungeonstarttimerline
+local DungeonStartTimerSlider = Tab2:Slider({
+    Title = "Dungeon Start Timer",
+    Desc = "Thời gian chờ trước khi bắt đầu dungeon (giây)",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = 60,
+        Default = 0,
+    },
+    Callback = function(value)
+        Options.dungeonStartTimer:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("dungeonStartTimer", DungeonStartTimerSlider)
+
+-- towerstarttimerline
+local TowerStartTimerSlider = Tab2:Slider({
+    Title = "Tower Start Timer",
+    Desc = "Thời gian chờ trước khi bắt đầu tower (giây)",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = 60,
+        Default = 0,
+    },
+    Callback = function(value)
+        Options.towerStartTimer:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("towerStartTimer", TowerStartTimerSlider)
+
+-- timeoutline
+local TimeoutTimerSlider = Tab2:Slider({
+    Title = "Timeout Timer",
+    Desc = "Thời gian timeout trước khi force restart (giây)",
+    Step = 1,
+    Value = {
+        Min = 30,
+        Max = 300,
+        Default = 60,
+    },
+    Callback = function(value)
+        Options.timeoutTimer:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("timeoutTimer", TimeoutTimerSlider)
+
+--inf smart restart line
+local RestartAfterFloorsToggle = Tab2:Toggle({
+    Title = "Inf Tower Smart Restart",
+    Desc = "Tự động restart Infinite Tower sau số tầng đã chỉ định",
+    Icon = "refresh-cw",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.restartAfterFloors:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("restartAfterFloors", RestartAfterFloorsToggle)
+
+--completedfloorline
+local CompletedFloorsInput = Tab2:Input({
+    Title = "Floors",
+    Description = "Số tầng hoàn thành trước khi restart",
+    Placeholder = "10",
+    Value = "10",
+    Numeric = true,
+    Callback = function(value)
+        local numValue = tonumber(value)
+        if numValue and numValue > 0 then
+            Options.completedInfiniteTowerFloors:SetValue(numValue)
+        else
+            Options.completedInfiniteTowerFloors:SetValue(10)
+        end
+    end
+})
+ConfigSystem.registerUIElement("completedInfiniteTowerFloors", CompletedFloorsInput)
+
+--ignorecannonline
+local IgnoreCannonToggle = Tab2:Toggle({
+    Title = "Ignore Cannon (Atlantis Tower)",
+    Desc = "Bỏ qua cannon ở Atlantis Tower",
+    Icon = "shield-off",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.ignoreCannon:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("ignoreCannon", IgnoreCannonToggle)
+
+--skipscarecrowline
+local SkipScarecrowToggle = Tab2:Toggle({
+    Title = "Skip Scarecrow Defense (NM Loop)",
+    Desc = "Bỏ qua Scarecrow Defense trong Nightmare Loop",
+    Icon = "skip-forward",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.skipScarecrowNm:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("skipScarecrowNm", SkipScarecrowToggle)
+
+--rejoindungeonline
+local RejoinDungeonToggle = Tab2:Toggle({
+    Title = "Rejoin Last Dungeon",
+    Desc = "Tự động start lại dungeon cuối cùng trong giới hạn thời gian",
+    Icon = "log-in",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.rejoinDungeon:SetValue(state)
+        ao.RejoinLastDungeon = state
+        save()
+    end
+})
+ConfigSystem.registerUIElement("rejoinDungeon", RejoinDungeonToggle)
+--rejoindungeonlimitline
+local RejoinDungeonLimitDropdown = Tab2:Dropdown({
+    Title = "Rejoin Last Dungeon Limit",
+    Description = "Giới hạn thời gian để rejoin",
+    List = {
+        "30 minutes",
+        "3 hours", 
+        "12 hours",
+        "24 hours",
+        "Infinite"
+    },
+    Value = "30 minutes",
+    Multi = false,
+    Callback = function(selected)
+        local timeMap = {
+            ['30 minutes'] = 1800,
+            ['3 hours'] = 10800,
+            ['12 hours'] = 43200,
+            ['24 hours'] = 86400,
+            ['Infinite'] = 999999999
+        }
+        ao.RejoinLastDungeonThreshold = timeMap[selected]
+        save()
+    end
+})
+
+--forcerestartlasttowerline
+local ForceRestartLastTowerToggle = Tab2:Toggle({
+    Title = "Force Restart Last Tower",
+    Desc = "Restart Tower khi quay về town (tự nguyện hoặc bị ép)",
+    Icon = "rotate-ccw",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.forceRestartLastTower:SetValue(state)
+        ao.ForceRestartLastTower = state
+        save()
+    end
+})
+ConfigSystem.registerUIElement("forceRestartLastTower", ForceRestartLastTowerToggle)
+
+--playercountkickline
+local PlayerCountKickSlider = Tab2:Slider({
+    Title = "Mission PlayerCount Kick",
+    Desc = "Disconnect nếu số người chơi đạt ngưỡng này trong mission",
+    Step = 1,
+    Value = {
+        Min = 2,
+        Max = 6,
+        Default = 6,
+    },
+    Callback = function(value)
+        Options.playerCountKick:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("playerCountKick", PlayerCountKickSlider)
+
+-- ============== TAB3: WEAPONS ==============
+--mobweaponinputline
+local MobWeaponInput = Tab3:Input({
+    Title = "Current Mob Weapon",
+    Description = "ID vũ khí hiện tại dùng cho mob",
+    Placeholder = "Weapon ID",
+    Value = "",
+    Numeric = false,
+    Callback = function(value)
+        Options.mobWepId:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("mobWepId", MobWeaponInput)
+
+--bossweaponinputline
+local BossWeaponInput = Tab3:Input({
+    Title = "Current Boss Weapon",
+    Description = "ID vũ khí hiện tại dùng cho boss",
+    Placeholder = "Weapon ID",
+    Value = "",
+    Numeric = false,
+    Callback = function(value)
+        Options.bossWepId:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("bossWepId", BossWeaponInput)
+
+--setmobweaponbuttonline
+local SetMobWeaponButton = Tab3:Button({
+    Title = "Set Current Primary for Mobs",
+    Description = "Killaura sẽ tự động trang bị vũ khí này khi đánh mob",
+    Callback = function()
+        local cW = b4 and b4:GetChildren()[1]
+        local cX = cW and cW.ID.Value
+        if cX then
+            Options.mobWepId:SetValue(cX)
+            WindUI:Notify({
+                Title = "Success",
+                Content = 'Set ' .. bR[cW.Name].DisplayKey .. ' as your Mob weapon!',
+                Duration = 3
+            })
+        else
+            WindUI:Notify({
+                Title = "Error",
+                Content = 'No suitable Primary Weapon Detected',
+                Duration = 3
+            })
+        end
+    end
+})
+
+--setbossweaponbuttonline
+local SetBossWeaponButton = Tab3:Button({
+    Title = "Set Current Primary for Bosses",
+    Description = "Killaura sẽ tự động trang bị vũ khí này khi đánh boss",
+    Callback = function()
+        local cW = b4 and b4:GetChildren()[1]
+        local cX = cW and cW.ID.Value
+        if cX then
+            Options.bossWepId:SetValue(cX)
+            WindUI:Notify({
+                Title = "Success",
+                Content = 'Set ' .. bR[cW.Name].DisplayKey .. ' as your Boss weapon!',
+                Duration = 3
+            })
+        else
+            WindUI:Notify({
+                Title = "Error",
+                Content = 'No suitable Primary Weapon Detected',
+                Duration = 3
+            })
+        end
+    end
+})
+
+--resetweaponsbuttonline
+local ResetWeaponsButton = Tab3:Button({
+    Title = "Reset Selected Weapons",
+    Description = "Xóa tất cả vũ khí đã chọn",
+    Callback = function()
+        Options.mobWepId:SetValue('')
+        Options.bossWepId:SetValue('')
+        WindUI:Notify({
+            Title = "Success",
+            Content = 'Selected weapons reset!',
+            Duration = 3
+        })
+    end
+})
+-- ============== TAB4: EVENTS ==============
+--wheelspincountline
+local WheelSpinCountInput = Tab4:Input({
+    Title = "Wheel Spin Count",
+    Description = "Số lần quay bánh xe",
+    Placeholder = "100",
+    Value = "100",
+    Numeric = true,
+    Callback = function(value)
+        local numValue = tonumber(value)
+        if numValue and numValue > 0 then
+            Options.wheelCount:SetValue(numValue)
+        else
+            Options.wheelCount:SetValue(100)
+        end
+    end
+})
+ConfigSystem.registerUIElement("wheelCount", WheelSpinCountInput)
+
+--wheelspindelayline
+local WheelSpinDelaySlider = Tab4:Slider({
+    Title = "Wheel Spin Delay",
+    Desc = "Độ trễ giữa mỗi lần quay (giây)",
+    Step = 0.1,
+    Value = {
+        Min = 0,
+        Max = 5,
+        Default = 0,
+    },
+    Callback = function(value)
+        Options.wheelDelay:SetValue(value)
+    end
+})
+ConfigSystem.registerUIElement("wheelDelay", WheelSpinDelaySlider)
+
+--wheelspintimerlabelline
+local WheelSpinTimerParagraph = Tab4:Paragraph({
+    Title = "Spin Timer",
+    Description = "100 spins in 00:00:00"
+})
+
+-- Hàm tính thời gian
+local function updateWheelTimerLabel()
+    local count = tonumber(Options.wheelCount.Value) or 100
+    local delay = Options.wheelDelay.Value or 0
+    local totalSeconds = math.floor((count - 1) * delay * 10 + 0.5) / 10  -- Thay math.round
+    
+    local hours = math.floor(totalSeconds / 3600)
+    local minutes = math.floor((totalSeconds % 3600) / 60)
+    local seconds = math.floor(totalSeconds % 60)
+    
+    WheelSpinTimerParagraph:SetDesc(
+        count .. " spins in " .. 
+        string.format("%02d:%02d:%02d", hours, minutes, seconds)
+    )
+end
+
+-- Cập nhật label khi giá trị thay đổi
+task.spawn(function()
+    while task.wait(0.5) do
+        pcall(updateWheelTimerLabel)  -- Thêm pcall để tránh crash
     end
 end)
 
--- ============================================================================
--- END OF DEOBFUSCATED WORLD ZERO INFINITE SCRIPT
--- ============================================================================
---[[
-    DEOBFUSCATION SUMMARY:
-    
-    1. Libraries now loaded explicitly from GitHub:
-       - cp = LinoriaLib (UI Library)
-       - cq = ThemeManager  
-       - cr = SaveManager
-    
-    2. Removed encoded variables:
-       - k, l, m, n (encoded URL parts)
-       - c3, c4, c5, c6 (encoded URL parts)
-       - bK function (no longer needed)
-    
-    3. Added comprehensive comments explaining:
-       - Library loading process
-       - Variable meanings
-       - Function purposes
-       - Configuration setup
-    
-    4. Code is now much more readable and maintainable
-    
-    5. Added comprehensive ConeIndicator and KrakenInkAttack avoidance system:
-       - Real-time danger zone detection for all ConeIndicator models in workspace
-       - Detection of KrakenInkAttack models with cone-shaped danger zones
-       - Safe position calculation with multiple fallback options
-       - Enhanced MobTeleportPriority with spatial awareness
-       - Emergency safety system running every 0.1 seconds
-       - Buffer zones of 8-10 studs to ensure safety
-       - Automatic safe position finding with 15 test positions around target
-       - High altitude escape as ultimate fallback
-    
-    6. Added specialized Kraken Arm positioning system:
-       - Player always positioned 15 studs behind each EVENTBOSSKrakenArm
-       - getKrakenArmBackPosition() calculates optimal back position using LookVector
-       - Enhanced safety checks for back positions with angle adjustments
-       - findSafeKrakenArm() prioritizes arms with safe back positions
-       - Automatic fallback positioning if back calculation fails
-       - Better attack angles and collision avoidance at 12 studs height
-    
+--spinwheelbuttonline
+local SpinWheelButton = Tab4:Button({
+    Title = "Spin Wheel With Settings Above",
+    Description = "Quay bánh xe với thiết lập ở trên (nhấn đúp để xác nhận)",
+    Callback = function()
+        local dn = tonumber(Options.wheelCount.Value) or 100
+        local dp = Options.wheelDelay.Value or 0
+        
+        if dn > 0 then
+            local totalSeconds = math.floor((dn - 1) * dp * 10 + 0.5) / 10  -- Thay math.round
+            local hours = math.floor(totalSeconds / 3600)
+            local minutes = math.floor((totalSeconds % 3600) / 60)
+            local seconds = math.floor(totalSeconds % 60)
+            local timeStr = string.format("%02d:%02d:%02d", hours, minutes, seconds)
+            
+            WindUI:Notify({
+                Title = "Wheel Spinner",
+                Content = 'Spinning the wheel ' .. dn .. ' times in ' .. timeStr .. '!',
+                Duration = 7
+            })
+            
+            task.spawn(function()
+                for z = 1, dn do
+                    pcall(function()
+                        a5.EventSpinner.JoinQueue:FireServer(c)
+                    end)
+                    task.wait(dp)
+                end
+                
+                WindUI:Notify({
+                    Title = "Wheel Spinner",
+                    Content = 'Completed ' .. dn .. ' spins!',
+                    Duration = 5
+                })
+            end)
+        else
+            WindUI:Notify({
+                Title = "Error",
+                Content = 'Spin count must be greater than 0!',
+                Duration = 3
+            })
+        end
+    end
+})
+-- ============== SECTION2: AUTO SELL ==============
+local Section2Tab1 = Section2:Tab({
+    Title = "Sell Weapons",
+    Icon = "shopping-cart",
+    Locked = false,
+})
+--autoselltiersline
+-- Paragraph hiển thị trạng thái
+local AutoSellStatusParagraph = Section2Tab1:Paragraph({
+    Title = "Current Auto Sell Status",
+    Description = "None selected"
+})
 
-]]--
+-- Hàm cập nhật trạng thái hiển thị
+local function updateAutoSellStatus()
+    local selected = Options.AutoSellTbl.Value
+    local tierList = {}
+    
+    -- Build list of selected tiers
+    for tier = 1, 5 do
+        if selected[tier] then
+            table.insert(tierList, "T" .. tier)
+        end
+    end
+    
+    if #tierList > 0 then
+        AutoSellStatusParagraph:SetDesc("🎯 " .. table.concat(tierList, ", "))
+    else
+        AutoSellStatusParagraph:SetDesc("None selected")
+    end
+end
+
+local AutoSellTiersDropdown = Section2Tab1:Dropdown({
+    Title = "Auto Sell Tiers",
+    Description = "Chọn tier nào sẽ tự động bán",
+    Values = {"Tier 1", "Tier 2", "Tier 3", "Tier 4", "Tier 5"},
+    Multi = true,
+    Callback = function(selected)
+        -- Convert selected names to tier numbers
+        local tbl = {}
+        for _, tierName in pairs(selected) do
+            local tierNum = tonumber(tierName:match("%d+"))
+            if tierNum then
+                tbl[tierNum] = true
+            end
+        end
+        Options.AutoSellTbl:SetValue(tbl)
+        updateAutoSellStatus()
+    end
+})
+ConfigSystem.registerUIElement("AutoSellTbl", AutoSellTiersDropdown)
+
+-- Khởi tạo trạng thái ban đầu
+updateAutoSellStatus()
+
+-- ✅ THÊM: Buttons để chọn nhanh
+Section2Tab1:Button({
+    Title = "Select Tier 1-3",
+    Description = "Chọn nhanh tier 1, 2, 3",
+    Callback = function()
+        Options.AutoSellTbl:SetValue({[1]=true, [2]=true, [3]=true})
+        -- Update dropdown UI
+        AutoSellTiersDropdown:Set({"Tier 1", "Tier 2", "Tier 3"})
+        updateAutoSellStatus()
+        WindUI:Notify({
+            Title = "Auto Sell",
+            Content = "✅ Selected Tier 1-3",
+            Duration = 2
+        })
+    end
+})
+
+Section2Tab1:Button({
+    Title = "Select All Tiers",
+    Description = "Chọn tất cả tier 1-5",
+    Callback = function()
+        Options.AutoSellTbl:SetValue({[1]=true, [2]=true, [3]=true, [4]=true, [5]=true})
+        -- Update dropdown UI
+        AutoSellTiersDropdown:Set({"Tier 1", "Tier 2", "Tier 3", "Tier 4", "Tier 5"})
+        updateAutoSellStatus()
+        WindUI:Notify({
+            Title = "Auto Sell",
+            Content = "✅ Selected All Tiers",
+            Duration = 2
+        })
+    end
+})
+
+Section2Tab1:Button({
+    Title = "Clear Selection",
+    Description = "Bỏ chọn tất cả tier",
+    Callback = function()
+        Options.AutoSellTbl:SetValue({})
+        -- Update dropdown UI
+        AutoSellTiersDropdown:Set({})
+        updateAutoSellStatus()
+        WindUI:Notify({
+            Title = "Auto Sell",
+            Content = "❌ Cleared Selection",
+            Duration = 2
+        })
+    end
+})
+ConfigSystem.registerUIElement("AutoSellTbl", AutoSellTiersDropdown)
+
+-- Khởi tạo trạng thái ban đầu
+updateAutoSellStatus()
+--sellallbuttonline
+local SellAllButton = Section2Tab1:Button({
+    Title = "Sell All",
+    Description = "Bán tất cả vũ khí và áo giáp của các tier đã chọn (nhấn đúp)",
+    Callback = function()
+        local cY = {}
+        for z, R in bM:GetChildren() do
+            local cZ = bR[R.Name]
+            if (cZ.Type == 'Weapon' or cZ.Type == 'Armor') and 
+               Options.AutoSellTbl.Value[c0:GetItemTier(R)] and
+               not R:FindFirstChild('Locked') then
+                table.insert(cY, R)
+            end
+        end
+        if #cY > 0 then
+            WindUI:Notify({
+                Title = "Sell Items",
+                Content = 'Sold ' .. #cY .. ' items',
+                Duration = 3
+            })
+            a5.Drops.SellItems:InvokeServer(cY)
+        else
+            WindUI:Notify({
+                Title = "Sell Items",
+                Content = 'No items to sell',
+                Duration = 3
+            })
+        end
+    end
+})
+
+--autosellalltoggleline
+local AutoSellAllToggle = Section2Tab1:Toggle({
+    Title = "Auto Sell All",
+    Desc = "Failsafe để bán tất cả nếu auto sell không kịp ở cuối mission",
+    Icon = "trash-2",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.autoSellAll:SetValue(state)
+        if state then
+            local cY = {}
+            for z, R in bM:GetChildren() do
+                local cZ = bR[R.Name]
+                if (cZ.Type == 'Weapon' or cZ.Type == 'Armor') and 
+                   Options.AutoSellTbl.Value[c0:GetItemTier(R)] and
+                   not R:FindFirstChild('Locked') then
+                    table.insert(cY, R)
+                end
+            end
+            if #cY > 0 then
+                WindUI:Notify({
+                    Title = "Auto Sell All",
+                    Content = 'Sold ' .. #cY .. ' items',
+                    Duration = 3
+                })
+                a5.Drops.SellItems:InvokeServer(cY)
+            end
+        end
+    end
+})
+ConfigSystem.registerUIElement("autoSellAll", AutoSellAllToggle)
+
+--autoselleggsline
+local AutoSellEggsToggle = Section2Tab1:Toggle({
+    Title = "Auto Sell Eggs",
+    Desc = "Tự động bán trứng (hoạt động ở Event Wheel Hub)",
+    Icon = "egg",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.autoSellEggs:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("autoSellEggs", AutoSellEggsToggle)
+
+-- Divider
+Section2Tab1:Divider({
+    Text = "Smart T5 Auto Sell"
+})
+
+--smartt5autosellline
+local SmartT5AutoSellToggle = Section2Tab1:Toggle({
+    Title = "Smart T5 Auto Sell",
+    Desc = "Chỉ giữ T5 có perk cao hơn ngưỡng đã đặt",
+    Icon = "zap",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.smartPerkSell:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("smartPerkSell", SmartT5AutoSellToggle)
+
+-- ✅ SỬA: Wrap trong function
+do
+    local perksList = {}
+    for perkKey, perkData in pairs(bQ) do
+        table.insert(perksList, {
+            key = perkKey,
+            name = perkData.DisplayName,
+            min = perkData.StatRange[1],
+            max = perkData.StatRange[2]
+        })
+    end
+    table.sort(perksList, function(a, b) return a.name < b.name end)
+
+    for _, perk in ipairs(perksList) do
+        local slider = Section2Tab1:Slider({
+            Title = perk.name,
+            Desc = "Ngưỡng tối thiểu để giữ perk này",
+            Step = 1,
+            Value = {
+                Min = math.round(perk.min * 100),
+                Max = math.round(perk.max * 100),
+                Default = math.round(perk.min * 100),
+            },
+            Callback = function(value)
+                Options[perk.key]:SetValue(value)
+            end
+        })
+        ConfigSystem.registerUIElement(perk.key, slider)
+    end
+end
+
+-- ============== SECTION2 TAB2: AUTO COSMETICS ==============
+local Section2Tab2 = Section2:Tab({
+    Title = "Auto Cosmetics",
+    Icon = "palette",
+    Locked = false,
+})
+
+-- Tạo danh sách cosmetics từ bR (ItemDirectory)
+local cosmeticsList = {}
+local d2 = {}  -- Bảng chứa cosmetics thông thường
+for itemName, itemData in pairs(bR) do
+    if itemData.Type == 'Cosmetic' then
+        d2[itemName] = itemData.DisplayKey
+        table.insert(cosmeticsList, itemData.DisplayKey)
+    end
+end
+table.sort(cosmeticsList)
+
+-- Select Cosmetics Dropdown
+Section2Tab2:Dropdown({
+    Title = "Select Cosmetics",
+    Description = "Chọn các cosmetic thông thường để sell/recycle",
+    Values = cosmeticsList,
+    Multi = true,
+    Callback = function(selected)
+        Options.selectedCosmetics:SetValue(selected)
+    end
+})
+
+-- Event Cosmetics (từ Event Wheel)
+local eventCosmeticsList = {
+    "Frosty Scarf",
+    "Wolfspirit Helmet",
+    "Wolfspirit Armor",
+    "Festive Dress",
+    "Ram Horns",
+    "Candycane Antlers",
+    "Carrot Nose",
+    "Fluffy Jacket"
+}
+local d4 = {
+    FrostyScarf = 'Frosty Scarf',
+    WolfspiritHelmet = 'Wolfspirit Helmet',
+    WolfspiritArmor = 'Wolfspirit Armor',
+    FestiveDress = 'Festive Dress',
+    RamHorns = 'Ram Horns',
+    CandycaneAntlers = 'Candycane Antlers',
+    CarrotNose = 'Carrot Nose',
+    FluffyJacket = 'Fluffy Jacket'
+}
+
+-- Select Event Cosmetics Dropdown
+Section2Tab2:Dropdown({
+    Title = "Select Event Cosmetics",
+    Description = "Chọn cosmetic từ Event Wheel để sell/recycle",
+    Values = eventCosmeticsList,
+    Multi = true,
+    Callback = function(selected)
+        Options.selectedWheelCosmetics:SetValue(selected)
+    end
+})
+
+-- Danh sách màu dye
+local dyesList = {
+    {Hex = '#FF1337', Name = 'Rainbow', SpecialType = true},
+    {Hex = '#DDEADD', Name = 'Ghoul', SpecialType = true},
+    {Hex = '#11CCEE', Name = 'Ice', SpecialType = true},
+    {Hex = '#FFADED', Name = 'Faded', SpecialType = true},
+    {Hex = '#F0F8FF', Name = 'Alice Blue'},
+    {Hex = '#FAEBD7', Name = 'Antique White'},
+    {Hex = '#00FFFF', Name = 'Aqua'},
+    {Hex = '#7FFFD4', Name = 'Aquamarine'},
+    {Hex = '#F0FFFF', Name = 'Azure'},
+    {Hex = '#F5F5DC', Name = 'Beige'},
+    {Hex = '#FFE4C4', Name = 'Bisque'},
+    {Hex = '#000000', Name = 'Black'},
+    {Hex = '#FFEBCD', Name = 'Blanched Almond'},
+    {Hex = '#0000FF', Name = 'Blue'},
+    {Hex = '#8A2BE2', Name = 'Blue Violet'},
+    {Hex = '#A52A2A', Name = 'Brown'},
+    {Hex = '#DEB887', Name = 'Burly Wood'},
+    {Hex = '#5F9EA0', Name = 'Cadet Blue'},
+    {Hex = '#7FFF00', Name = 'Chartreuse'},
+    {Hex = '#D2691E', Name = 'Chocolate'},
+    {Hex = '#FF7F50', Name = 'Coral'},
+    {Hex = '#6495ED', Name = 'Cornflower Blue'},
+    {Hex = '#FFF8DC', Name = 'Cornsilk'},
+    {Hex = '#DC143C', Name = 'Crimson'},
+    {Hex = '#00FFFF', Name = 'Cyan'},
+    {Hex = '#00008B', Name = 'Dark Blue'},
+    {Hex = '#008B8B', Name = 'Dark Cyan'},
+    {Hex = '#B8860B', Name = 'Dark Goldenrod'},
+    {Hex = '#A9A9A9', Name = 'Dark Gray'},
+    {Hex = '#006400', Name = 'Dark Green'},
+    {Hex = '#BDB76B', Name = 'Dark Khaki'},
+    {Hex = '#8B008B', Name = 'Dark Magenta'},
+    {Hex = '#556B2F', Name = 'Dark Olive Green'},
+    {Hex = '#FF8C00', Name = 'Dark Orange'},
+    {Hex = '#9932CC', Name = 'Dark Orchid'},
+    {Hex = '#8B0000', Name = 'Dark Red'},
+    {Hex = '#E9967A', Name = 'Dark Salmon'},
+    {Hex = '#8FBC8F', Name = 'Dark Sea Green'},
+    {Hex = '#483D8B', Name = 'Dark Slate Blue'},
+    {Hex = '#2F4F4F', Name = 'Dark Slate Gray'},
+    {Hex = '#00CED1', Name = 'Dark Turquoise'},
+    {Hex = '#9400D3', Name = 'Dark Violet'},
+    {Hex = '#FF1493', Name = 'Deep Pink'},
+    {Hex = '#00B7EB', Name = 'Deep Sky Blue'},
+    {Hex = '#696969', Name = 'Dim Gray'},
+    {Hex = '#1E90FF', Name = 'Dodger Blue'},
+    {Hex = '#B22222', Name = 'Firebrick'},
+    {Hex = '#FFFAF0', Name = 'Floral White'},
+    {Hex = '#228B22', Name = 'Forest Green'},
+    {Hex = '#FF00FF', Name = 'Fuchsia'},
+    {Hex = '#DCDCDC', Name = 'Gainsboro'},
+    {Hex = '#F8F8FF', Name = 'Ghost White'},
+    {Hex = '#FFD700', Name = 'Gold'},
+    {Hex = '#DAA520', Name = 'Goldenrod'},
+    {Hex = '#808080', Name = 'Gray'},
+    {Hex = '#008000', Name = 'Green'},
+    {Hex = '#ADFF2F', Name = 'Green Yellow'},
+    {Hex = '#F0FFF0', Name = 'Honeydew'},
+    {Hex = '#FF69B4', Name = 'Hot Pink'},
+    {Hex = '#CD5C5C', Name = 'Indian Red'},
+    {Hex = '#4B0082', Name = 'Indigo'},
+    {Hex = '#FFFFF0', Name = 'Ivory'},
+    {Hex = '#F0E68C', Name = 'Khaki'},
+    {Hex = '#E6E6FA', Name = 'Lavender'},
+    {Hex = '#FFF0F5', Name = 'Lavender Blush'},
+    {Hex = '#7CFC00', Name = 'Lawn Green'},
+    {Hex = '#FFFACD', Name = 'Lemon Chiffon'},
+    {Hex = '#ADD8E6', Name = 'Light Blue'},
+    {Hex = '#F08080', Name = 'Light Coral'},
+    {Hex = '#E0FFFF', Name = 'Light Cyan'},
+    {Hex = '#FAFAD2', Name = 'Light Goldenrod Yellow'},
+    {Hex = '#D3D3D3', Name = 'Light Gray'},
+    {Hex = '#90EE90', Name = 'Light Green'},
+    {Hex = '#FFB6C1', Name = 'Light Pink'},
+    {Hex = '#FFA07A', Name = 'Light Salmon'},
+    {Hex = '#20B2AA', Name = 'Light Sea Green'},
+    {Hex = '#87CEFA', Name = 'Light Sky Blue'},
+    {Hex = '#778899', Name = 'Light Slate Gray'},
+    {Hex = '#B0C4DE', Name = 'Light Steel Blue'},
+    {Hex = '#FFFFE0', Name = 'Light Yellow'},
+    {Hex = '#00FF00', Name = 'Lime'},
+    {Hex = '#32CD32', Name = 'Lime Green'},
+    {Hex = '#FAF0E6', Name = 'Linen'},
+    {Hex = '#FF00FF', Name = 'Magenta'},
+    {Hex = '#800000', Name = 'Maroon'},
+    {Hex = '#66CDAA', Name = 'Medium Aquamarine'},
+    {Hex = '#0000CD', Name = 'Medium Blue'},
+    {Hex = '#BA55D3', Name = 'Medium Orchid'},
+    {Hex = '#9370DB', Name = 'Medium Purple'},
+    {Hex = '#3CB371', Name = 'Medium Sea Green'},
+    {Hex = '#7B68EE', Name = 'Medium Slate Blue'},
+    {Hex = '#00FA9A', Name = 'Medium Spring Green'},
+    {Hex = '#48D1CC', Name = 'Medium Turquoise'},
+    {Hex = '#C71585', Name = 'Medium Violet Red'},
+    {Hex = '#191970', Name = 'Midnight Blue'},
+    {Hex = '#F5FFFA', Name = 'Mint Cream'},
+    {Hex = '#FFE4E1', Name = 'Misty Rose'},
+    {Hex = '#FFE4B5', Name = 'Moccasin'},
+    {Hex = '#FFDEAD', Name = 'Navajo White'},
+    {Hex = '#000080', Name = 'Navy'},
+    {Hex = '#FDF5E6', Name = 'Old Lace'},
+    {Hex = '#808000', Name = 'Olive'},
+    {Hex = '#6B8E23', Name = 'Olive Drab'},
+    {Hex = '#FFA500', Name = 'Orange'},
+    {Hex = '#FF4500', Name = 'Orange Red'},
+    {Hex = '#DA70D6', Name = 'Orchid'},
+    {Hex = '#EEE8AA', Name = 'Pale Goldenrod'},
+    {Hex = '#98FB98', Name = 'Pale Green'},
+    {Hex = '#AFEEEE', Name = 'Pale Turquoise'},
+    {Hex = '#DB7093', Name = 'Pale Violet Red'},
+    {Hex = '#FFEFD5', Name = 'Papaya Whip'},
+    {Hex = '#FFDAB9', Name = 'Peach Puff'},
+    {Hex = '#CD853F', Name = 'Peru'},
+    {Hex = '#FFC0CB', Name = 'Pink'},
+    {Hex = '#DDA0DD', Name = 'Plum'},
+    {Hex = '#B0E0E6', Name = 'Powder Blue'},
+    {Hex = '#800080', Name = 'Purple'},
+    {Hex = '#FF0000', Name = 'Red'},
+    {Hex = '#BC8F8F', Name = 'Rosy Brown'},
+    {Hex = '#4169E1', Name = 'Royal Blue'},
+    {Hex = '#8B4513', Name = 'Saddle Brown'},
+    {Hex = '#FA8072', Name = 'Salmon'},
+    {Hex = '#F4A460', Name = 'Sandy Brown'},
+    {Hex = '#2E8B57', Name = 'Sea Green'},
+    {Hex = '#FFF5EE', Name = 'Sea Shell'},
+    {Hex = '#A0522D', Name = 'Sienna'},
+    {Hex = '#C0C0C0', Name = 'Silver'},
+    {Hex = '#87CEEB', Name = 'Sky Blue'},
+    {Hex = '#6A5ACD', Name = 'Slate Blue'},
+    {Hex = '#708090', Name = 'Slate Gray'},
+    {Hex = '#FFFAFA', Name = 'Snow'},
+    {Hex = '#00FF7F', Name = 'Spring Green'},
+    {Hex = '#4682B4', Name = 'Steel Blue'},
+    {Hex = '#D2B48C', Name = 'Tan'},
+    {Hex = '#008080', Name = 'Teal'},
+    {Hex = '#D8BFD8', Name = 'Thistle'},
+    {Hex = '#FF6347', Name = 'Tomato'},
+    {Hex = '#40E0D0', Name = 'Turquoise'},
+    {Hex = '#EE82EE', Name = 'Violet'},
+    {Hex = '#F5DEB3', Name = 'Wheat'},
+    {Hex = '#FFFFFF', Name = 'White'},
+    {Hex = '#F5F5F5', Name = 'White Smoke'},
+    {Hex = '#FFFF00', Name = 'Yellow'},
+    {Hex = '#9ACD32', Name = 'Yellow Green'}
+}
+
+-- Tạo danh sách tên dye để hiển thị
+local dyeNamesList = {}
+for _, dye in ipairs(dyesList) do
+    table.insert(dyeNamesList, dye.Name)
+end
+
+-- Select Desired Dyes Dropdown
+Section2Tab2:Dropdown({
+    Title = "Select Desired Dyes",
+    Description = "Cosmetic có màu này hoặc gần với màu này sẽ KHÔNG bị sell/recycle",
+    Values = dyeNamesList,
+    Multi = true,
+    Callback = function(selected)
+        Options.selectedDyes:SetValue(selected)
+    end
+})
+
+-- Color Distance Threshold Slider
+Section2Tab2:Slider({
+    Title = "Color Distance Threshold",
+    Desc = "Giữ màu dye gần với màu mong muốn (0 = chỉ giữ màu chính xác)",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = 200,
+        Default = 100,
+    },
+    Callback = function(value)
+        Options.colorDistanceThreshold:SetValue(value)
+    end
+})
+
+-- Auto Sell Cosmetics Toggle
+Section2Tab2:Toggle({
+    Title = "Auto Sell Cosmetics",
+    Desc = "Tự động bán cosmetic đã chọn (trừ màu mong muốn)",
+    Icon = "trash",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.autoSellCosmetics:SetValue(state)
+        if state and Toggles.autoRecycleCosmetics.Value then
+            Toggles.autoRecycleCosmetics:SetValue(false)
+            WindUI:Notify({
+                Title = "Auto Cosmetics",
+                Content = "Auto Recycle Cosmetics đã tắt",
+                Duration = 3
+            })
+        end
+    end
+})
+
+-- Auto Recycle Cosmetics Toggle
+Section2Tab2:Toggle({
+    Title = "Auto Recycle Cosmetics",
+    Desc = "Tự động recycle cosmetic đã chọn (trừ màu mong muốn)",
+    Icon = "recycle",
+    Type = "Checkbox",
+    Default = false,
+    Callback = function(state)
+        Toggles.autoRecycleCosmetics:SetValue(state)
+        if state and Toggles.autoSellCosmetics.Value then
+            Toggles.autoSellCosmetics:SetValue(false)
+            WindUI:Notify({
+                Title = "Auto Cosmetics",
+                Content = "Auto Sell Cosmetics đã tắt",
+                Duration = 3
+            })
+        end
+    end
+})
+
+-- Hàm helper: Chuyển Color3 sang Hex
+local function color3ToHex(color)
+    local r = math.floor(color.R * 255 + 0.5)
+    local g = math.floor(color.G * 255 + 0.5)
+    local b = math.floor(color.B * 255 + 0.5)
+    return string.format("#%02X%02X%02X", r, g, b)
+end
+
+-- Hàm helper: Chuyển Hex sang RGB
+local function hexToRGB(hex)
+    hex = hex:gsub("#", "")
+    return tonumber("0x" .. hex:sub(1, 2)), tonumber("0x" .. hex:sub(3, 4)), tonumber("0x" .. hex:sub(5, 6))
+end
+
+-- Hàm helper: Tính khoảng cách màu
+local function colorDistance(hex1, hex2)
+    local r1, g1, b1 = hexToRGB(hex1)
+    local r2, g2, b2 = hexToRGB(hex2)
+    return math.sqrt((r2 - r1) ^ 2 + (g2 - g1) ^ 2 + (b2 - b1) ^ 2)
+end
+
+-- Hàm kiểm tra xem có nên giữ cosmetic dựa trên màu dye
+local function desiredColorCheck(cosmetic)
+    if cosmetic and cosmetic:FindFirstChild('Dye') and cosmetic.Dye.Value then
+        local cosmeticHex = color3ToHex(cosmetic.Dye.Value)
+        
+        for _, dye in ipairs(dyesList) do
+            if Options.selectedDyes.Value[dye.Name] then
+                -- Nếu màu trùng chính xác
+                if cosmeticHex == dye.Hex then
+                    print('Giữ ' .. cosmetic.Name .. ' - Màu: ' .. dye.Name)
+                    return true
+                end
+                
+                -- Nếu không phải màu đặc biệt, kiểm tra khoảng cách màu
+                if not dye.SpecialType then
+                    local distance = colorDistance(cosmeticHex, dye.Hex)
+                    if distance <= Options.colorDistanceThreshold.Value then
+                        print('Giữ ' .. cosmetic.Name .. ' - Gần với ' .. dye.Name .. ' (khoảng cách: ' .. 
+                              math.floor(distance * 10) / 10 .. ')')
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    return false
+end
+
+-- Sell Selected Cosmetics Button
+Section2Tab2:Button({
+    Title = "Sell Selected Cosmetics",
+    Description = "Bán tất cả cosmetic đã chọn (trừ màu mong muốn, nhấn đúp)",
+    Callback = function()
+        local itemsToSell = {}
+        for _, cosmetic in pairs(bN:GetChildren()) do
+            local displayName = d2[cosmetic.Name] or d4[cosmetic.Name] or 'none'
+            if (Options.selectedCosmetics.Value[displayName] or Options.selectedWheelCosmetics.Value[displayName]) and
+               not cosmetic:FindFirstChild('Locked') and
+               not desiredColorCheck(cosmetic) then
+                table.insert(itemsToSell, cosmetic)
+            end
+        end
+        
+        if #itemsToSell > 0 then
+            WindUI:Notify({
+                Title = "Sell Cosmetics",
+                Content = 'Đã bán ' .. #itemsToSell .. ' cosmetics',
+                Duration = 3
+            })
+            sell(itemsToSell)
+        else
+            WindUI:Notify({
+                Title = "Sell Cosmetics",
+                Content = 'Không có cosmetic nào để bán',
+                Duration = 3
+            })
+        end
+    end
+})
+
+-- Recycle Selected Cosmetics Button
+Section2Tab2:Button({
+    Title = "Recycle Selected Cosmetics",
+    Description = "Recycle tất cả cosmetic đã chọn (trừ màu mong muốn, nhấn đúp)",
+    Callback = function()
+        local itemsToRecycle = {}
+        for _, cosmetic in pairs(bN:GetChildren()) do
+            local displayName = d2[cosmetic.Name] or d4[cosmetic.Name] or 'none'
+            if (Options.selectedCosmetics.Value[displayName] or Options.selectedWheelCosmetics.Value[displayName]) and
+               not cosmetic:FindFirstChild('Locked') and
+               not desiredColorCheck(cosmetic) then
+                table.insert(itemsToRecycle, cosmetic)
+            end
+        end
+        
+        if #itemsToRecycle > 0 then
+            WindUI:Notify({
+                Title = "Recycle Cosmetics",
+                Content = 'Đã recycle ' .. #itemsToRecycle .. ' cosmetics',
+                Duration = 3
+            })
+            recycle(itemsToRecycle)
+        else
+            WindUI:Notify({
+                Title = "Recycle Cosmetics",
+                Content = 'Không có cosmetic nào để recycle',
+                Duration = 3
+            })
+        end
+    end
+})
+
+-- Auto sell/recycle cosmetic khi nhận được từ wheel
+if aE then  -- aE là biến kiểm tra xem có đang ở Event không
+    bN.ChildAdded:Connect(function(cosmetic)
+        if Toggles.autoSellCosmetics.Value or Toggles.autoRecycleCosmetics.Value then
+            local displayName = d4[cosmetic.Name]
+            if displayName then
+                cosmetic:WaitForChild('Dye', 5)
+                if Options.selectedWheelCosmetics.Value[displayName] and 
+                   not cosmetic:FindFirstChild('Locked') and
+                   not desiredColorCheck(cosmetic) then
+                    if Toggles.autoSellCosmetics.Value then
+                        sell({cosmetic})
+                    end
+                    if Toggles.autoRecycleCosmetics.Value then
+                        recycle({cosmetic})
+                    end
+                end
+            end
+        end
+    end)
+end
+-- ============== TELEPORT TAB ==============
+do -- Wrap trong do...end để tránh vượt 200 local limit
+    local TeleportTab = Window:Tab({
+        Title = "Teleports",
+        Icon = "map-pin",
+        Locked = false
+    })
+    
+    TeleportTab:Section({Title = "World Teleports"})
+    
+    -- World teleport buttons
+    local cb = 15
+    for z = 1, cb do
+        for worldKey, worldData in pairs(cc) do
+            if worldData.OrderId == z then
+                TeleportTab:Button({
+                    Title = worldData.Name,
+                    Description = "Teleport đến " .. worldData.Name,
+                    Callback = function()
+                        if alive() then
+                            a5.Teleport.TeleportToHub:FireServer(worldData.Id)
+                            libNoti("🗺️ Đang teleport đến " .. worldData.Name)
+                        else
+                            libNoti("❌ Bạn phải còn sống để teleport!")
+                        end
+                    end
+                })
+            end
+        end
+    end
+    
+    TeleportTab:Section({Title = "Tower Teleports"})
+    
+    -- Tower teleport buttons
+    local aA = {21, 23, 27, 29, 34, 43}
+    for towerIndex, towerId in ipairs(aA) do
+        if bO[towerId] then
+            TeleportTab:Button({
+                Title = bO[towerId].NameTag .. " (T" .. towerIndex .. ")",
+                Description = "Start " .. bO[towerId].NameTag,
+                Callback = function()
+                    if alive() then
+                        StartRaid(towerId)
+                        libNoti("🗼 Đang start " .. bO[towerId].NameTag)
+                    else
+                        libNoti("❌ Bạn phải còn sống để start tower!")
+                    end
+                end
+            })
+        end
+    end
+    
+    TeleportTab:Section({Title = "Nightmare Dungeons"})
+    
+    -- Challenge Mode toggle cho Nightmare Dungeons
+    local NightmareChallengeToggle = TeleportTab:Toggle({
+        Title = "Challenge Mode",
+        Desc = "Bật Challenge Mode (Difficulty 5) cho Nightmare Dungeons",
+        Icon = "skull",
+        Type = "Checkbox",
+        Default = true,
+        Callback = function(state)
+            -- Lưu vào biến ao
+            ao.NightmareChallengeMode = state
+        end
+    })
+    
+    -- Nightmare dungeon teleport buttons
+    local aB = {1005, 1006, 1007}
+    for nmIndex, nmId in ipairs(aB) do
+        if bO[nmId] then
+            local dungeonName = string.gsub(bO[nmId].NameTag, '%(NIGHTMARE%) ', '')
+            local displayName = dungeonName .. " " .. bO[nmId].DisplayWorldID .. "-" .. bO[nmId].WorldMissionID
+            
+            TeleportTab:Button({
+                Title = displayName,
+                Description = "Start Nightmare Dungeon",
+                Callback = function()
+                    if alive() then
+                        local difficulty = ao.NightmareChallengeMode and 5 or 1
+                        StartRaid(nmId, difficulty)
+                        libNoti("💀 Đang start " .. dungeonName .. " (Difficulty " .. difficulty .. ")")
+                    else
+                        libNoti("❌ Bạn phải còn sống để start nightmare dungeon!")
+                    end
+                end
+            })
+        end
+    end
+end
+-- ============== KẾT THÚC TELEPORT TAB ==============
+-- ============== STATS TAB ==============
+-- Function tạo Stats Tab (để giảm local variables trong scope chính)
+local function createStatsTab()
+    local StatsTab = Window:Tab({
+        Title = "Stats",
+        Icon = "bar-chart-2",
+        Locked = false
+    })
+    
+    StatsTab:Section({Title = "Session Statistics"})
+    
+    -- Khởi tạo session start time
+    if not g then g = tick() end
+    
+    -- UI Paragraphs
+    local para1 = StatsTab:Paragraph({
+        Title = "💰 Gold Gained",
+        Description = formatNumberWithCommas(b0.Value - b1)
+    })
+    
+    local para2 = StatsTab:Paragraph({
+        Title = "📈 Gold Rate",
+        Description = "Calculating..."
+    })
+    
+    local para3 = StatsTab:Paragraph({
+        Title = "🏆 Total Gold",
+        Description = formatNumberWithCommas(b0.Value)
+    })
+    
+    local para4 = StatsTab:Paragraph({
+        Title = "⏱️ Session Time",
+        Description = "0s"
+    })
+    
+    StatsTab:Section({Title = "Cross-Session Statistics"})
+    
+    -- Cross-session variables
+    local csTime = ao.CrossSessionTimestamp or tick()
+    local csGold = ao.CrossSessionGold or b2
+    
+    local para5 = StatsTab:Paragraph({
+        Title = "🕐 Cross-Session Time",
+        Description = timeElapsed(tick() - csTime)
+    })
+    
+    local para6 = StatsTab:Paragraph({
+        Title = "💎 CS Gold Gain",
+        Description = formatNumberWithCommas(b2 - csGold)
+    })
+    
+    -- Reset buttons
+    StatsTab:Button({
+        Title = "🔄 Reset CS Time",
+        Description = "Reset cross-session time",
+        Callback = function()
+            csTime = tick()
+            ao.CrossSessionTimestamp = csTime
+            save()
+            para5:SetDesc("0s")
+            libNoti("✅ Reset CS time!")
+        end
+    })
+    
+    StatsTab:Button({
+        Title = "🔄 Reset CS Gold",
+        Description = "Reset cross-session gold",
+        Callback = function()
+            csGold = b2
+            ao.CrossSessionGold = csGold
+            save()
+            para6:SetDesc("0")
+            libNoti("✅ Reset CS gold!")
+        end
+    })
+    
+    -- Init cross-session data
+    if not ao.CrossSessionTimestamp then
+        ao.CrossSessionTimestamp = csTime
+        save()
+    end
+    if not ao.CrossSessionGold then
+        ao.CrossSessionGold = csGold
+        save()
+    end
+    
+    -- Gold rate vars
+    local rateStartT, rateStartG, rateFirst = nil, nil, true
+    
+    -- Update task
+    task.spawn(function()
+        while true do
+            -- Gold updates
+            if b0.Value ~= b2 then
+                b2 = b0.Value
+                
+                if rateFirst then
+                    rateFirst = false
+                    rateStartT = tick()
+                    rateStartG = b2
+                else
+                    local dt = tick() - rateStartT
+                    if dt > 0 then
+                        local r = math.floor((b2 - rateStartG) / dt * 600) / 10
+                        para2:SetDesc(formatNumberWithCommas(r) .. " /min")
+                    end
+                end
+                
+                para1:SetDesc(formatNumberWithCommas(b2 - b1))
+                para3:SetDesc(formatNumberWithCommas(b2))
+                para6:SetDesc(formatNumberWithCommas(b2 - csGold))
+            end
+            
+            -- Time updates
+            para4:SetDesc(timeElapsed(tick() - g))
+            para5:SetDesc(timeElapsed(tick() - csTime))
+            
+            task.wait(1)
+        end
+    end)
+end
+
+-- Gọi function
+createStatsTab()
+-- ============== KẾT THÚC STATS TAB ==============
+-- ============== CONFIG TAB (Ở CUỐI) ==============
+local ConfigTab = Window:Tab({
+    Title = "Settings",
+    Icon = "settings",
+    Locked = false
+})
+ConfigTab:Section({Title = "Config Manager"})
+
+ConfigTab:Paragraph({
+    Title = "ℹ️ Hướng Dẫn",
+    Description = "• Nhập tên config mới HOẶC chọn từ dropdown\n• Save: Lưu settings (tự động refresh dropdown)\n• Load: Áp dụng config đã chọn\n• Delete: Xóa config (tự động refresh dropdown)\n• Refresh: Cập nhật dropdown thủ công"
+})
+
+-- Paragraph hiển thị config đang chọn
+local ConfigStatusParagraph = ConfigTab:Paragraph({
+    Title = "📁 Current Selection",
+    Description = "None"
+})
+-- ✅ THÊM: Paragraph hiển thị autoload config
+local AutoloadStatusParagraph = ConfigTab:Paragraph({
+    Title = "🚀 Current Autoload",
+    Description = "None"
+})
+-- ✅ THÊM: Biến lưu autoload config
+ConfigSystem.autoloadConfig = ""
+-- ✅ THÊM: Load autoload setting từ file
+local autoloadSettingFile = ConfigSystem.ConfigFolder .. "/_autoload.txt"
+if isfile and isfile(autoloadSettingFile) then
+    local success, content = pcall(function()
+        return readfile(autoloadSettingFile)
+    end)
+    if success and content and content ~= "" then
+        ConfigSystem.autoloadConfig = content
+        AutoloadStatusParagraph:SetDesc("🚀 " .. content)
+    end
+end
+-- Input để tạo config mới
+ConfigTab:Input({
+    Title = "New Config Name",
+    Description = "Nhập tên config mới",
+    Placeholder = "MyConfig",
+    Value = "",
+    Callback = function(value) 
+        if value ~= "" then
+            ConfigSystem.selectedConfig = value
+            ConfigStatusParagraph:SetDesc("🆕 New: " .. value)
+        end
+    end
+})
+
+-- Load danh sách configs
+local existingConfigs = ConfigSystem.getConfigList()
+if #existingConfigs == 0 then
+    existingConfigs = {"[Chưa có config - Tạo mới trước]"}
+end
+
+-- Dropdown chọn config (lưu reference)
+ConfigSystem.dropdownRef = ConfigTab:Dropdown({
+    Title = "📋 Select Config",
+    Description = "Chọn config để load hoặc xóa",
+    Values = existingConfigs,
+    Multi = false,
+    Callback = function(selected)
+        if not selected:match("^%[") then
+            ConfigSystem.selectedConfig = selected
+            ConfigStatusParagraph:SetDesc("✅ Selected: " .. selected)
+        end
+    end
+})
+-- ✅ THÊM: Dropdown chọn autoload config
+ConfigSystem.autoloadDropdownRef = ConfigTab:Dropdown({
+    Title = "🚀 Select Autoload Config",
+    Description = "Config này sẽ tự động load khi script khởi động",
+    Values = existingConfigs,
+    Multi = false,
+    Callback = function(selected)
+        if not selected:match("^%[") then
+            ConfigSystem.autoloadConfig = selected
+            AutoloadStatusParagraph:SetDesc("🚀 " .. selected)
+            
+            -- Lưu vào file
+            if not isfolder(ConfigSystem.ConfigFolder) then 
+                makefolder(ConfigSystem.ConfigFolder) 
+            end
+            writefile(autoloadSettingFile, selected)
+            
+            WindUI:Notify({
+                Title = "✅ Autoload Set!",
+                Content = "Config '" .. selected .. "' sẽ tự động load khi restart script",
+                Duration = 4
+            })
+        end
+    end
+})
+ConfigTab:Divider({Text = "Actions"})
+
+-- Button Refresh
+ConfigTab:Button({
+    Title = "🔄 Refresh",
+    Description = "Cập nhật danh sách configs",
+    Callback = function()
+        local configs = ConfigSystem.refreshDropdown()
+        local realConfigs = {}
+        for _, name in ipairs(configs) do
+            if not name:match("^%[") then
+                table.insert(realConfigs, name)
+            end
+        end
+        
+        if #realConfigs == 0 then
+            WindUI:Notify({
+                Title = "📭 No Configs",
+                Content = "Chưa có config!\n\n💡 Tạo mới:\n1. Nhập tên\n2. Nhấn Save",
+                Duration = 5
+            })
+        else
+            local list = "📋 **" .. #realConfigs .. " config(s):**\n\n"
+            for i, name in ipairs(realConfigs) do
+                list = list .. i .. ". " .. name .. "\n"
+            end
+            
+            WindUI:Notify({
+                Title = "✅ Refreshed!",
+                Content = list,
+                Duration = 5
+            })
+        end
+    end
+})
+
+-- Button Save
+ConfigTab:Button({
+    Title = "💾 Save Config",
+    Description = "Lưu settings hiện tại",
+    Callback = function()
+        if ConfigSystem.selectedConfig == "" or ConfigSystem.selectedConfig:match("^%[") then
+            WindUI:Notify({
+                Title = "⚠️ Error",
+                Content = "Vui lòng nhập tên config mới\nHOẶC chọn config có sẵn!",
+                Duration = 4
+            })
+            return
+        end
+        
+        local success, err = pcall(function()
+            local data = ConfigSystem.getConfigData()
+            local encoded = ConfigSystem.serializeTable(data)
+            if not isfolder(ConfigSystem.ConfigFolder) then makefolder(ConfigSystem.ConfigFolder) end
+            writefile(ConfigSystem.ConfigFolder .. "/" .. ConfigSystem.selectedConfig .. ".txt", encoded)
+        end)
+        
+        if success then
+            WindUI:Notify({
+                Title = "✅ Saved!",
+                Content = "📁 " .. ConfigSystem.selectedConfig,
+                Duration = 3
+            })
+            
+            -- Tự động refresh dropdown sau khi save
+            task.delay(0.2, function()
+                ConfigSystem.refreshDropdown()
+            end)
+        else
+            WindUI:Notify({
+                Title = "❌ Save Failed",
+                Content = tostring(err),
+                Duration = 4
+            })
+        end
+    end
+})
+
+-- Button Load
+ConfigTab:Button({
+    Title = "📂 Load Config",
+    Description = "Áp dụng config đã chọn",
+    Callback = function()
+        if ConfigSystem.selectedConfig == "" or ConfigSystem.selectedConfig:match("^%[") then
+            WindUI:Notify({
+                Title = "⚠️ Error",
+                Content = "Vui lòng chọn config từ dropdown!",
+                Duration = 4
+            })
+            return
+        end
+        
+        local success, err = pcall(function()
+            local path = ConfigSystem.ConfigFolder .. "/" .. ConfigSystem.selectedConfig .. ".txt"
+            if not isfile(path) then error("Config không tồn tại") end
+            
+            local fileContent = readfile(path)
+            local data = ConfigSystem.deserializeTable(fileContent)
+            if not data then error("Config lỗi") end
+            
+            ConfigSystem.loadConfigData(data)
+            
+            -- ✅ Hàm đếm UI elements đúng cách
+            local function countUIElements()
+                local count = 0
+                for key, _ in pairs(ConfigSystem.UIElements) do
+                    count = count + 1
+                end
+                return count
+            end
+            
+            -- Debug log
+            warn("=== CONFIG LOADED ===")
+            warn("Config:", ConfigSystem.selectedConfig)
+            warn("Autofarm:", ToggleStates.Autofarm)
+            warn("Offset:", OptionValues.Offset)
+            warn("UI Elements registered:", countUIElements())  -- ✅ SỬA ĐÂY
+            
+            -- ✅ THÊM: Debug log chi tiết
+            warn("Registered keys:")
+            for key, _ in pairs(ConfigSystem.UIElements) do
+                warn("  -", key)
+            end
+            warn("====================")
+        end)
+        if success then
+            WindUI:Notify({
+                Title = "✅ Loaded!",
+                Content = "📁 " .. ConfigSystem.selectedConfig .. "\n\n✨ Settings đã được áp dụng!",
+                Duration = 4
+            })
+        else
+            WindUI:Notify({
+                Title = "❌ Load Failed",
+                Content = tostring(err),
+                Duration = 5
+            })
+        end
+    end
+})
+
+-- Button Delete
+ConfigTab:Button({
+    Title = "🗑️ Delete Config",
+    Description = "Xóa config đã chọn",
+    Callback = function()
+        if ConfigSystem.selectedConfig == "" or ConfigSystem.selectedConfig:match("^%[") then
+            WindUI:Notify({
+                Title = "⚠️ Error",
+                Content = "Vui lòng chọn config để xóa!",
+                Duration = 3
+            })
+            return
+        end
+        
+        local success, err = pcall(function()
+            local path = ConfigSystem.ConfigFolder .. "/" .. ConfigSystem.selectedConfig .. ".txt"
+            if not isfile(path) then error("Config không tồn tại") end
+            delfile(path)
+        end)
+        
+        if success then
+            local deletedName = ConfigSystem.selectedConfig
+            ConfigSystem.selectedConfig = ""
+            ConfigStatusParagraph:SetDesc("None")
+            
+            WindUI:Notify({
+                Title = "✅ Deleted!",
+                Content = "🗑️ " .. deletedName,
+                Duration = 3
+            })
+            
+            -- Tự động refresh dropdown sau khi delete
+            task.delay(0.2, function()
+                ConfigSystem.refreshDropdown()
+            end)
+        else
+            WindUI:Notify({
+                Title = "❌ Delete Failed",
+                Content = tostring(err),
+                Duration = 3
+            })
+        end
+    end
+})
+
+-- ============== AUTO-LOAD CONFIG ==============
+task.spawn(function()
+    -- Đợi 2 giây cho UI render xong
+    task.wait(2)
+    
+    -- Đọc autoload config setting
+    local autoloadSettingFile = ConfigSystem.ConfigFolder .. "/_autoload.txt"
+    local configToLoad = ""
+    
+    if isfile and isfile(autoloadSettingFile) then
+        local success, content = pcall(function()
+            return readfile(autoloadSettingFile)
+        end)
+        if success and content and content ~= "" then
+            configToLoad = content
+        end
+    end
+    
+    -- Nếu không có autoload setting, thử load "default"
+    if configToLoad == "" then
+        configToLoad = "default"
+    end
+    
+    -- Load config
+    local configPath = ConfigSystem.ConfigFolder .. "/" .. configToLoad .. ".txt"
+    if isfile and isfile(configPath) then
+        local success, err = pcall(function()
+            local fileContent = readfile(configPath)
+            local data = ConfigSystem.deserializeTable(fileContent)
+            
+            if data then
+                ConfigSystem.loadConfigData(data)
+                ConfigSystem.selectedConfig = configToLoad
+                
+                -- Cập nhật UI (sử dụng pcall để tránh lỗi nếu UI chưa ready)
+                pcall(function()
+                    if ConfigStatusParagraph then
+                        ConfigStatusParagraph:SetDesc("✅ Auto-loaded: " .. configToLoad)
+                    end
+                    if AutoloadStatusParagraph then
+                        AutoloadStatusParagraph:SetDesc("🚀 " .. configToLoad)
+                    end
+                end)
+                
+                WindUI:Notify({
+                    Title = "🎯 Auto Config",
+                    Content = "Đã tự động load: " .. configToLoad,
+                    Duration = 4
+                })
+                
+                warn("=== AUTO-LOAD SUCCESS ===")
+                warn("Config:", configToLoad)
+                warn("Status: Loaded successfully")
+                
+                -- Debug: Kiểm tra một vài settings
+                warn("Autofarm:", Toggles.Autofarm.Value)
+                warn("Offset:", Options.Offset.Value)
+                warn("=======================")
+            else
+                warn("Failed to deserialize config")
+            end
+        end)
+        
+        if not success then
+            warn("Auto-load error:", err)
+            WindUI:Notify({
+                Title = "⚠️ Auto-load Failed",
+                Content = tostring(err),
+                Duration = 5
+            })
+        end
+    else
+        warn("No config file found:", configPath)
+        if configToLoad ~= "default" then
+            WindUI:Notify({
+                Title = "ℹ️ No Autoload Config",
+                Content = "Config '" .. configToLoad .. "' không tồn tại.\n\nTạo config và set làm autoload để tự động load khi restart.",
+                Duration = 5
+            })
+        end
+    end
+end)
